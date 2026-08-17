@@ -461,8 +461,6 @@ function App() {
             style={{ 
               width: '220px', // Bạn có thể tăng giảm số này để chỉnh độ to/nhỏ của logo
               height: 'auto',
-              borderRadius: '16px', // Bo góc nhẹ nếu ảnh là hình vuông
-              boxShadow: '0 8px 32px rgba(0,0,0,0.2)' // Thêm bóng đổ cho logo nổi bật
             }} 
           />
         </div>
