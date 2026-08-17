@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 // === Dữ liệu nhân sự mẫu ===
 // === Dữ liệu nhân sự mẫu (Có tài khoản & Mật khẩu) ===
-const mockUsers = [
+const initialUsers = [
   { id: 'u1', username: 'admin', password: '123', name: 'Trần Nam Phong', role: 'admin', title: 'Quản lý dự án' },
   { id: 'u2', username: 'vana', password: '123', name: 'Nguyễn Văn A', role: 'nhân sự', title: 'Kỹ thuật viên' },
   { id: 'u3', username: 'thib', password: '123', name: 'Lê Thị B', role: 'nhân sự', title: 'Kỹ thuật viên' },
@@ -311,7 +311,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [activeNav, setActiveNav] = useState("home");
-  const [selectedUser, setSelectedUser] = useState(mockUsers[0].id);
+  const [selectedUser, setSelectedUser] = useState(initialUsers[0].id);
   const [expandedTask, setExpandedTask] = useState(null);
   const [tasksData, setTasksData] = useState([]);
 
@@ -882,7 +882,7 @@ function App() {
         {/* Chỉ ADMIN mới thấy thanh chọn nhân sự này */}
         {currentUser.role === 'admin' && (
           <div style={{ display: 'flex', gap: '12px', borderBottom: `1px solid ${C.border}`, paddingBottom: '20px', marginBottom: '24px', overflowX: 'auto' }}>
-            {mockUsers.map(user => (
+            {initialUsers.map(user => (
               <button key={user.id} onClick={() => setSelectedUser(user.id)} style={{
                 padding: '10px 18px', borderRadius: '30px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', border: 'none', transition: 'all 0.2s',
                 backgroundColor: selectedUser === user.id ? C.accent : C.bg, color: selectedUser === user.id ? '#fff' : C.inkMuted,
