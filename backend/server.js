@@ -170,6 +170,23 @@ app.delete('/api/tasks/:id', async (req, res) => {
     res.status(500).json({ error: 'Lỗi server' });
   }
 });
+app.delete('/api/files/:id', async (req, res) => {
+  try {
+    const fileId = req.params.id;
+
+    // Xóa bản ghi của file trong bảng 'files'
+    const { error } = await supabase
+      .from('files')
+      .delete()
+      .eq('id', fileId);
+
+    if (error) throw error;
+    res.json({ message: 'Xóa file thành công' });
+  } catch (error) {
+    console.error("Lỗi khi xóa file:", error);
+    res.status(500).json({ error: 'Lỗi server khi xóa file' });
+  }
+});
 // Bật máy chủ lắng nghe kết nối
 app.listen(PORT, () => {
   console.log(`🚀 Backend Server đang chạy tại địa chỉ: http://localhost:${PORT}`);

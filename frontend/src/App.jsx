@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-// === Dữ liệu mẫu (Mock Data) ===
+// === Dữ liệu nhân sự mẫu ===
 const mockUsers = [
   { id: "u1", name: "Trần Nam Phong", role: "Kỹ thuật viên" },
   { id: "u2", name: "Nguyễn Văn A", role: "Chỉ huy trưởng" },
@@ -23,6 +23,8 @@ const C = {
   okSoft: "#E8F5EC",
   blue: "#0284C7",
   blueSoft: "#E0F2FE",
+  danger: "#DC2626",
+  dangerSoft: "#FEF2F2",
 };
 
 // === Icons ===
@@ -120,18 +122,25 @@ const IconClock = () => (
     <path d="M12 7v5l3.5 2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-const IconAlert = () => (
+const IconCheckCircle = () => (
   <svg
     width="22"
     height="22"
     viewBox="0 0 24 24"
     fill="none"
-    stroke={C.warn}
+    stroke={C.ok}
     strokeWidth="1.8"
   >
-    <path d="M12 3 2 20h20L12 3Z" strokeLinejoin="round" />
-    <path d="M12 10v4" strokeLinecap="round" />
-    <circle cx="12" cy="17" r="0.6" fill={C.warn} stroke="none" />
+    <path
+      d="M22 11.08V12a10 10 0 1 1-5.93-9.14"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M22 4L12 14.01l-3-3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 const IconFolder = () => (
@@ -149,19 +158,6 @@ const IconFolder = () => (
     />
   </svg>
 );
-const IconDoc = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={C.inkMuted}
-    strokeWidth="1.8"
-  >
-    <path d="M7 3h7l4 4v14H7V3Z" strokeLinejoin="round" />
-    <path d="M14 3v4h4" strokeLinejoin="round" />
-  </svg>
-);
 const IconPlus = () => (
   <svg
     width="15"
@@ -172,6 +168,22 @@ const IconPlus = () => (
     strokeWidth="2.4"
   >
     <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+  </svg>
+);
+const IconTrash = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path
+      d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 const IconCheck = ({ done }) => (
@@ -243,30 +255,34 @@ const IconChevronUp = () => (
     <path d="M18 15l-6-6-6 6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-const IconTrash = () => (
+const IconX = () => (
   <svg
-    width="18"
-    height="18"
+    width="14"
+    height="14"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="2.5"
   >
     <path
-      d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+      d="M18 6L6 18M6 6l12 12"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
   </svg>
 );
+
+// Hãy đổi link này thành link Render Backend của bạn nếu đang đưa lên mạng
+const API_URL = "http://localhost:5000/api";
+
 function App() {
-  // Navigation State
+  const [isLoading, setIsLoading] = useState(true);
   const [activeNav, setActiveNav] = useState("home");
-  // Tasks State
   const [selectedUser, setSelectedUser] = useState(mockUsers[0].id);
   const [expandedTask, setExpandedTask] = useState(null);
   const [tasksData, setTasksData] = useState([]);
-  // --- STATE CHO MODAL TẠO VIỆC ---
+
+  // State Modal Tạo Việc
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTask, setNewTask] = useState({
     title: "",
@@ -274,133 +290,127 @@ function App() {
     date: "",
   });
 
+  // 1. Tự động tải dữ liệu khi mở web
+  useEffect(() => {
+    fetch(`${API_URL}/tasks`)
+      .then((res) => res.json())
+      .then((data) => {
+        setTasksData(data);
+        // Thêm độ trễ nhỏ 1s để người dùng nhìn thấy màn hình Loading đẹp mắt
+        setTimeout(() => setIsLoading(false), 1000);
+      })
+      .catch((err) => {
+        console.error("Lỗi kết nối:", err);
+        setIsLoading(false);
+      });
+  }, []);
+
+  // Tính toán số liệu thực tế cho Dashboard
+  const totalTasks = tasksData.length;
+  const completedTasks = tasksData.filter(
+    (t) => t.status === "completed",
+  ).length;
+  const pendingTasks = totalTasks - completedTasks;
+
+  const userTasks = tasksData.filter((task) => task.userId === selectedUser);
+
+  // --- CÁC HÀM XỬ LÝ API ---
   const handleCreateTask = async (e) => {
-    e.preventDefault(); // Ngăn trình duyệt tải lại trang khi bấm submit
+    e.preventDefault();
     try {
-      const response = await fetch("https://quan-ly-hop-dong-smac.onrender.com/api/tasks", {
+      const response = await fetch(`${API_URL}/tasks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...newTask,
-          userId: selectedUser, // Tự động gắn việc cho người đang được chọn ở Tab
-        }),
+        body: JSON.stringify({ ...newTask, userId: selectedUser }),
       });
       if (response.ok) {
-        alert("Đã giao việc thành công!");
-        setIsModalOpen(false); // Đóng hộp thoại
-        setNewTask({ title: "", label: "Hợp đồng", date: "" }); // Reset form
-        window.location.reload(); // Tải lại trang để hiện việc mới
+        setIsModalOpen(false);
+        setNewTask({ title: "", label: "Hợp đồng", date: "" });
+        window.location.reload();
       }
     } catch (error) {
-      console.error("Lỗi:", error);
-      alert("Không thể tạo công việc");
+      console.error("Lỗi tạo việc:", error);
     }
   };
-  // --- HÀM TÍCH / BỎ TÍCH HOÀN THÀNH ---
+
   const handleToggleStatus = async (taskId, currentStatus, e) => {
-    e.stopPropagation(); // Ngăn sự kiện click làm mở rộng tab đính kèm file
-    const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
-    
-    // Cập nhật giao diện ngay lập tức cho mượt (không cần chờ phản hồi)
-    setTasksData(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
-
+    e.stopPropagation();
+    const newStatus = currentStatus === "completed" ? "pending" : "completed";
+    setTasksData((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)),
+    );
     try {
-      await fetch(`https://quan-ly-hop-dong-smac.onrender.com/api/tasks/${taskId}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+      await fetch(`${API_URL}/tasks/${taskId}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
       });
     } catch (error) {
-      console.error('Lỗi khi đổi trạng thái:', error);
+      console.error("Lỗi đổi trạng thái:", error);
     }
   };
 
-  // --- HÀM XÓA CÔNG VIỆC ---
   const handleDeleteTask = async (taskId, e) => {
-    e.stopPropagation(); 
-    if (!window.confirm("Bạn có chắc chắn muốn xóa công việc này? Mọi file đính kèm sẽ bị xóa theo.")) return;
-
+    e.stopPropagation();
+    if (!window.confirm("Xóa dự án này và mọi file đính kèm?")) return;
     try {
-      const response = await fetch(`https://quan-ly-hop-dong-smac.onrender.com/api/tasks/${taskId}`, {
-        method: 'DELETE'
+      const res = await fetch(`${API_URL}/tasks/${taskId}`, {
+        method: "DELETE",
       });
-      if (response.ok) {
-        // Lọc bỏ công việc đã xóa khỏi giao diện
-        setTasksData(prev => prev.filter(t => t.id !== taskId));
-      }
+      if (res.ok) setTasksData((prev) => prev.filter((t) => t.id !== taskId));
     } catch (error) {
-      console.error('Lỗi xóa việc:', error);
+      console.error("Lỗi xóa việc:", error);
     }
   };
-  // --------------------------------
-  // Tự động gọi API khi giao diện vừa tải xong
-  useEffect(() => {
-    fetch("https://quan-ly-hop-dong-smac.onrender.com/api/tasks")
-      .then((response) => response.json()) // Biến dữ liệu thô thành định dạng web hiểu được
-      .then((data) => {
-        setTasksData(data); // Đổ dữ liệu vào state
-      })
-      .catch((error) => console.error("Lỗi khi kết nối Backend:", error));
-  }, []);
-  // ------------------------------
 
-  // Lọc công việc theo người dùng đang được chọn (dùng biến tasksData mới)
-  const userTasks = tasksData.filter((task) => task.userId === selectedUser);
   const handleFileUpload = async (taskId, event) => {
     const file = event.target.files[0];
     if (!file) return;
-
-    // Đóng gói file vào FormData để gửi đi
     const formData = new FormData();
     formData.append("pdfFile", file);
     formData.append("taskId", taskId);
 
     try {
-      alert(`Đang tải file ${file.name} lên hệ thống... Vui lòng đợi.`);
-
-      const response = await fetch("https://quan-ly-hop-dong-smac.onrender.com/api/upload", {
+      alert(`Đang tải lên: ${file.name}...`);
+      const res = await fetch(`${API_URL}/upload`, {
         method: "POST",
         body: formData,
       });
-
-      if (response.ok) {
-        alert("Tải file thành công!");
-        // Tải lại trang để lấy dữ liệu mới nhất từ Database
-        window.location.reload();
-      } else {
-        alert("Lỗi khi tải file lên!");
-      }
+      if (res.ok) window.location.reload();
     } catch (error) {
       console.error("Lỗi upload:", error);
-      alert("Không thể kết nối đến máy chủ.");
     }
   };
-  const navItems = [
-    { id: "home", icon: IconHome, label: "Trang chủ" },
-    { id: "tasks", icon: IconUsers, label: "Công việc nhân sự" },
-    { id: "chat", icon: IconChat, label: "Trò chuyện" },
-    { id: "saved", icon: IconStar, label: "Đánh dấu" },
-  ];
 
+  const handleDeleteFile = async (fileId, e) => {
+    e.preventDefault(); // Ngăn mở file PDF sang tab mới
+    e.stopPropagation();
+    if (!window.confirm("Bạn có chắc chắn muốn xóa file này?")) return;
+
+    try {
+      const res = await fetch(`${API_URL}/files/${fileId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        // Cập nhật lại giao diện, bỏ file đã xóa
+        setTasksData((prevTasks) =>
+          prevTasks.map((task) => ({
+            ...task,
+            files: task.files.filter((f) => f.id !== fileId),
+          })),
+        );
+      }
+    } catch (error) {
+      console.error("Lỗi xóa file:", error);
+    }
+  };
+
+  // Các style chung
   const cardStyle = {
     backgroundColor: C.surface,
     padding: "28px",
     borderRadius: "14px",
     border: `1px solid ${C.border}`,
-  };
-  const btnPrimary = {
-    backgroundColor: C.accent,
-    color: "#fff",
-    border: "none",
-    padding: "10px 18px",
-    borderRadius: "8px",
-    fontSize: "14px",
-    fontWeight: 600,
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    fontFamily: "Inter, sans-serif",
   };
   const btnSecondary = {
     backgroundColor: "#fff",
@@ -419,7 +429,77 @@ function App() {
     fontFamily: "Inter, sans-serif",
   };
 
-  // Khối giao diện Trang chủ (Giữ nguyên như cũ)
+  // ==========================================
+  // GIAO DIỆN LOADING SCREEN
+  // ==========================================
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          backgroundColor: C.accent,
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "Manrope, sans-serif",
+        }}
+      >
+        <style>{`
+          @keyframes pulse { 0% { opacity: 0.6; transform: scale(0.98); } 50% { opacity: 1; transform: scale(1); } 100% { opacity: 0.6; transform: scale(0.98); } }
+          .loading-logo { animation: pulse 1.5s infinite ease-in-out; }
+        `}</style>
+        <div className="loading-logo" style={{ textAlign: "center" }}>
+          <div
+            style={{
+              color: "#fff",
+              fontSize: "56px",
+              fontWeight: 800,
+              letterSpacing: "4px",
+              marginBottom: "8px",
+            }}
+          >
+            HACOM
+          </div>
+          <div
+            style={{
+              color: C.accentSoft,
+              fontSize: "16px",
+              fontWeight: 500,
+              letterSpacing: "2px",
+            }}
+          >
+            HỆ THỐNG QUẢN LÝ PCCC
+          </div>
+        </div>
+        <div
+          style={{
+            marginTop: "40px",
+            width: "200px",
+            height: "4px",
+            backgroundColor: "rgba(255,255,255,0.2)",
+            borderRadius: "4px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              width: "50%",
+              height: "100%",
+              backgroundColor: "#fff",
+              borderRadius: "4px",
+              animation: "slide 1s infinite linear",
+            }}
+          />
+        </div>
+        <style>{`@keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }`}</style>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // GIAO DIỆN TRANG CHỦ (DASHBOARD)
+  // ==========================================
   const renderHome = () => (
     <>
       <div
@@ -433,17 +513,6 @@ function App() {
         }}
       >
         <div>
-          <div
-            style={{
-              color: C.inkFaint,
-              fontSize: "13px",
-              marginBottom: "6px",
-              fontFamily: "IBM Plex Mono, monospace",
-              letterSpacing: "0.02em",
-            }}
-          >
-            THỨ HAI · 10/08/2026
-          </div>
           <h1
             style={{
               fontSize: "28px",
@@ -451,42 +520,34 @@ function App() {
               margin: 0,
               color: C.ink,
               fontFamily: "Manrope, sans-serif",
-              letterSpacing: "-0.01em",
             }}
           >
-            Chào buổi sáng, Trần Nam Phong
+            Tổng quan Hệ thống
           </h1>
-        </div>
-        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-          <button className="btn-primary" style={btnPrimary}>
-            Liên hệ tư vấn
-          </button>
           <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              alignItems: "center",
-              cursor: "pointer",
-            }}
+            style={{ color: C.inkMuted, fontSize: "14px", marginTop: "6px" }}
           >
-            <img
-              src="https://i.pravatar.cc/42?u=tran"
-              alt="Avatar"
-              style={{
-                width: "38px",
-                height: "38px",
-                borderRadius: "50%",
-                border: `1px solid ${C.border}`,
-              }}
-            />
-            <div style={{ fontSize: "13px" }}>
-              <div style={{ color: C.ink, fontWeight: 600 }}>
-                Công ty CP Ứng dụng...
-              </div>
-              <div style={{ fontSize: "12px", color: C.inkFaint }}>
-                Chuyển đổi ▾
-              </div>
-            </div>
+            Theo dõi tiến độ các hạng mục PCCC.
+          </div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            alignItems: "center",
+            padding: "8px 16px",
+            backgroundColor: "#fff",
+            borderRadius: "30px",
+            border: `1px solid ${C.border}`,
+          }}
+        >
+          <img
+            src="https://i.pravatar.cc/42?u=tran"
+            alt="Avatar"
+            style={{ width: "32px", height: "32px", borderRadius: "50%" }}
+          />
+          <div style={{ fontSize: "13px", fontWeight: 600, color: C.ink }}>
+            Trần Nam Phong
           </div>
         </div>
       </div>
@@ -495,192 +556,225 @@ function App() {
         className="stats-row"
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1.3fr 1fr",
-          gap: "16px",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "20px",
           marginBottom: "32px",
         }}
       >
+        {/* Khối Đang xử lý */}
         <div
           style={{
             ...cardStyle,
-            padding: "20px 22px",
+            padding: "24px",
             display: "flex",
             alignItems: "center",
-            gap: "16px",
+            gap: "20px",
+            backgroundColor: C.blueSoft,
+            border: "none",
           }}
         >
-          <IconClock />
+          <div
+            style={{
+              width: "50px",
+              height: "50px",
+              borderRadius: "50%",
+              backgroundColor: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <IconClock />
+          </div>
           <div>
             <div
               style={{
-                fontSize: "24px",
+                fontSize: "32px",
                 fontWeight: 800,
-                color: C.ink,
+                color: C.blue,
                 fontFamily: "Manrope, sans-serif",
+                lineHeight: 1,
               }}
             >
-              2
+              {pendingTasks}
             </div>
-            <div style={{ color: C.inkMuted, fontSize: "13px" }}>
-              Sắp đến hạn
+            <div
+              style={{
+                color: "#0369A1",
+                fontSize: "14px",
+                fontWeight: 600,
+                marginTop: "4px",
+              }}
+            >
+              Dự án Đang xử lý
             </div>
           </div>
         </div>
+        {/* Khối Hoàn thành */}
         <div
           style={{
             ...cardStyle,
-            padding: "20px 22px",
+            padding: "24px",
             display: "flex",
             alignItems: "center",
-            gap: "16px",
-            backgroundColor: C.warnSoft,
-            border: `1px solid #F0CBAE`,
+            gap: "20px",
+            backgroundColor: C.okSoft,
+            border: "none",
           }}
         >
-          <IconAlert />
+          <div
+            style={{
+              width: "50px",
+              height: "50px",
+              borderRadius: "50%",
+              backgroundColor: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <IconCheckCircle />
+          </div>
           <div>
             <div
               style={{
-                fontSize: "24px",
+                fontSize: "32px",
                 fontWeight: 800,
-                color: C.warn,
+                color: C.ok,
                 fontFamily: "Manrope, sans-serif",
+                lineHeight: 1,
               }}
             >
-              04
+              {completedTasks}
             </div>
             <div
-              style={{ color: "#9A3B12", fontSize: "13px", fontWeight: 600 }}
+              style={{
+                color: "#166534",
+                fontSize: "14px",
+                fontWeight: 600,
+                marginTop: "4px",
+              }}
             >
-              Quá hạn — cần xử lý
+              Đã hoàn thành
             </div>
           </div>
         </div>
+        {/* Khối Tổng số */}
         <div
           style={{
             ...cardStyle,
-            padding: "20px 22px",
+            padding: "24px",
             display: "flex",
             alignItems: "center",
-            gap: "16px",
+            gap: "20px",
           }}
         >
-          <IconUsers />
+          <div
+            style={{
+              width: "50px",
+              height: "50px",
+              borderRadius: "50%",
+              backgroundColor: C.bg,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <IconFolder />
+          </div>
           <div>
             <div
               style={{
-                fontSize: "24px",
+                fontSize: "32px",
                 fontWeight: 800,
                 color: C.ink,
                 fontFamily: "Manrope, sans-serif",
+                lineHeight: 1,
               }}
             >
-              7
+              {totalTasks}
             </div>
-            <div style={{ color: C.inkMuted, fontSize: "13px" }}>
-              Việc cộng tác
+            <div
+              style={{
+                color: C.inkMuted,
+                fontSize: "14px",
+                fontWeight: 600,
+                marginTop: "4px",
+              }}
+            >
+              Tổng số Hồ sơ
             </div>
           </div>
         </div>
       </div>
 
-      <div
-        className="main-grid"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1.7fr 1fr",
-          gap: "20px",
-        }}
-      >
-        <div style={{ ...cardStyle, display: "flex", flexDirection: "column" }}>
-          <h2
-            style={{
-              fontSize: "17px",
-              fontWeight: 700,
-              margin: "0 0 24px 0",
-              color: C.ink,
-              fontFamily: "Manrope, sans-serif",
-            }}
-          >
-            Yêu cầu gửi đi
-          </h2>
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
-              gap: "18px",
-              padding: "40px 0",
-            }}
-          >
-            <IconFolder />
-            <div>
+      <div style={{ ...cardStyle, display: "flex", flexDirection: "column" }}>
+        <h2
+          style={{
+            fontSize: "17px",
+            fontWeight: 700,
+            margin: "0 0 20px 0",
+            color: C.ink,
+            fontFamily: "Manrope, sans-serif",
+          }}
+        >
+          Cập nhật Mới nhất
+        </h2>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {tasksData
+            .slice(-4)
+            .reverse()
+            .map((task) => (
               <div
+                key={task.id}
                 style={{
-                  fontSize: "15.5px",
-                  fontWeight: 700,
-                  color: C.ink,
-                  marginBottom: "6px",
-                  fontFamily: "Manrope, sans-serif",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "16px",
+                  border: `1px solid ${C.border}`,
+                  borderRadius: "10px",
                 }}
               >
-                Chưa có yêu cầu
+                <div
+                  style={{ display: "flex", gap: "12px", alignItems: "center" }}
+                >
+                  <span
+                    style={{
+                      padding: "4px 10px",
+                      backgroundColor: C.bg,
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      color: C.inkMuted,
+                    }}
+                  >
+                    {task.label}
+                  </span>
+                  <span
+                    style={{ fontSize: "14px", fontWeight: 600, color: C.ink }}
+                  >
+                    {task.title}
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontSize: "13px",
+                    color: task.status === "completed" ? C.ok : C.warn,
+                    fontWeight: 600,
+                  }}
+                >
+                  {task.status === "completed" ? "Hoàn thành" : "Đang xử lý"}
+                </span>
               </div>
-              <div
-                style={{
-                  color: C.inkMuted,
-                  fontSize: "13.5px",
-                  maxWidth: "230px",
-                  lineHeight: 1.5,
-                }}
-              >
-                Không gian quản lý tất cả các yêu cầu đã gửi.
-              </div>
-            </div>
-            <button
-              className="btn-secondary"
-              style={{
-                ...btnSecondary,
-                width: "auto",
-                padding: "9px 18px",
-                marginTop: "4px",
-              }}
-            >
-              <IconPlus /> Thêm yêu cầu
-            </button>
-          </div>
-        </div>
-        <div style={{ ...cardStyle, display: "flex", flexDirection: "column" }}>
-          <h2
-            style={{
-              fontSize: "17px",
-              fontWeight: 700,
-              margin: "0 0 24px 0",
-              color: C.ink,
-              fontFamily: "Manrope, sans-serif",
-            }}
-          >
-            Hoạt động gần đây
-          </h2>
-          <div
-            style={{
-              color: C.inkFaint,
-              fontSize: "14px",
-              textAlign: "center",
-              padding: "40px 0",
-            }}
-          >
-            Chưa có hoạt động nào
-          </div>
+            ))}
         </div>
       </div>
     </>
   );
 
-  // Khối giao diện Tab Quản lý Công việc nhân sự
+  // ==========================================
+  // GIAO DIỆN QUẢN LÝ NHÂN SỰ VÀ FILE
+  // ==========================================
   const renderTasks = () => (
     <>
       <div style={{ marginBottom: "32px" }}>
@@ -691,7 +785,6 @@ function App() {
             margin: "0 0 8px 0",
             color: C.ink,
             fontFamily: "Manrope, sans-serif",
-            letterSpacing: "-0.01em",
           }}
         >
           Quản lý Hợp đồng & Hồ sơ
@@ -702,7 +795,7 @@ function App() {
       </div>
 
       <div style={cardStyle}>
-        {/* Tab chọn nhân sự */}
+        {/* Chọn nhân sự */}
         <div
           style={{
             display: "flex",
@@ -723,8 +816,8 @@ function App() {
                 fontWeight: 600,
                 fontSize: "14px",
                 cursor: "pointer",
-                transition: "all 0.2s",
                 border: "none",
+                transition: "all 0.2s",
                 backgroundColor: selectedUser === user.id ? C.accent : C.bg,
                 color: selectedUser === user.id ? "#fff" : C.inkMuted,
               }}
@@ -737,7 +830,6 @@ function App() {
           ))}
         </div>
 
-        {/* Nút thêm việc */}
         <div
           style={{
             display: "flex",
@@ -747,7 +839,7 @@ function App() {
           }}
         >
           <h3 style={{ margin: 0, fontSize: "16px", color: C.ink }}>
-            Danh sách công việc ({userTasks.length})
+            Danh sách dự án phụ trách ({userTasks.length})
           </h3>
           <button
             onClick={() => setIsModalOpen(true)}
@@ -758,7 +850,7 @@ function App() {
           </button>
         </div>
 
-        {/* Danh sách việc */}
+        {/* Danh sách */}
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {userTasks.length === 0 ? (
             <div
@@ -768,7 +860,7 @@ function App() {
                 color: C.inkFaint,
               }}
             >
-              Nhân sự này hiện không có công việc nào.
+              Chưa có dự án nào được giao.
             </div>
           ) : (
             userTasks.map((task) => (
@@ -780,50 +872,102 @@ function App() {
                   overflow: "hidden",
                 }}
               >
-                {/* Dòng tóm tắt công việc */}
-                <div 
-                  className="task-header"
-                  onClick={() => setExpandedTask(expandedTask === task.id ? null : task.id)}
+                {/* Header Công việc */}
+                <div
+                  onClick={() =>
+                    setExpandedTask(expandedTask === task.id ? null : task.id)
+                  }
                   style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', cursor: 'pointer',
-                    backgroundColor: expandedTask === task.id ? '#FAFBFC' : '#fff', transition: 'background 0.2s'
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "16px 20px",
+                    cursor: "pointer",
+                    backgroundColor:
+                      expandedTask === task.id ? "#FAFBFC" : "#fff",
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    
-                    {/* Bọc IconCheck trong một div để gắn sự kiện Click */}
-                    <div onClick={(e) => handleToggleStatus(task.id, task.status, e)} style={{ padding: '4px' }}>
-                      <IconCheck done={task.status === 'completed'} />
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "14px",
+                    }}
+                  >
+                    <div
+                      onClick={(e) =>
+                        handleToggleStatus(task.id, task.status, e)
+                      }
+                      style={{ padding: "4px" }}
+                    >
+                      <IconCheck done={task.status === "completed"} />
                     </div>
-                    
                     <div>
-                      {/* Thêm gạch ngang chữ nếu việc đã xong */}
-                      <div style={{ 
-                        fontSize: '15px', color: C.ink, fontWeight: 600, marginBottom: '4px',
-                        textDecoration: task.status === 'completed' ? 'line-through' : 'none',
-                        opacity: task.status === 'completed' ? 0.6 : 1
-                      }}>
+                      <div
+                        style={{
+                          fontSize: "15px",
+                          color: C.ink,
+                          fontWeight: 600,
+                          marginBottom: "4px",
+                          textDecoration:
+                            task.status === "completed"
+                              ? "line-through"
+                              : "none",
+                          opacity: task.status === "completed" ? 0.6 : 1,
+                        }}
+                      >
                         {task.title}
                       </div>
-                      <div style={{ display: 'flex', gap: '12px', fontSize: '13px' }}>
-                        <span style={{ color: C.accent, fontWeight: 500 }}>{task.label}</span>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "12px",
+                          fontSize: "13px",
+                        }}
+                      >
+                        <span style={{ color: C.accent, fontWeight: 500 }}>
+                          {task.label}
+                        </span>
                         <span style={{ color: C.inkFaint }}>|</span>
-                        <span style={{ color: C.warn, fontFamily: 'IBM Plex Mono, monospace' }}>Deadline: {task.date}</span>
+                        <span
+                          style={{
+                            color: C.warn,
+                            fontFamily: "IBM Plex Mono, monospace",
+                          }}
+                        >
+                          Deadline: {task.date}
+                        </span>
                       </div>
                     </div>
                   </div>
-                  
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: C.inkMuted }}>
-                    {/* Nút Xóa (Thùng rác) */}
-                    <div onClick={(e) => handleDeleteTask(task.id, e)} style={{ color: '#DC2626', padding: '6px', display: 'flex', alignItems: 'center', borderRadius: '6px' }} title="Xóa dự án">
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "16px",
+                      color: C.inkMuted,
+                    }}
+                  >
+                    <div
+                      onClick={(e) => handleDeleteTask(task.id, e)}
+                      style={{
+                        color: C.danger,
+                        padding: "6px",
+                        borderRadius: "6px",
+                      }}
+                      title="Xóa dự án"
+                    >
                       <IconTrash />
                     </div>
-                    {/* Nút xổ xuống */}
-                    {expandedTask === task.id ? <IconChevronUp /> : <IconChevronDown />}
+                    {expandedTask === task.id ? (
+                      <IconChevronUp />
+                    ) : (
+                      <IconChevronDown />
+                    )}
                   </div>
                 </div>
 
-                {/* Phần mở rộng hiển thị File PDF */}
+                {/* Quản lý Files Đính kèm */}
                 {expandedTask === task.id && (
                   <div
                     style={{
@@ -849,8 +993,6 @@ function App() {
                       >
                         TÀI LIỆU ĐÍNH KÈM:
                       </div>
-
-                      {/* Nút Thêm File (Ẩn thẻ input đi, chỉ hiện nút bấm đẹp) */}
                       <label
                         style={{
                           ...btnSecondary,
@@ -874,12 +1016,11 @@ function App() {
                       style={{
                         display: "grid",
                         gridTemplateColumns:
-                          "repeat(auto-fill, minmax(250px, 1fr))",
+                          "repeat(auto-fill, minmax(280px, 1fr))",
                         gap: "12px",
                       }}
                     >
                       {task.files.map((file) => (
-                        /* Thẻ <a> bọc ngoài để bấm vào là mở file trên tab mới */
                         <a
                           key={file.id}
                           href={file.file_url || "#"}
@@ -888,6 +1029,7 @@ function App() {
                           style={{ textDecoration: "none" }}
                         >
                           <div
+                            className="file-card"
                             style={{
                               display: "flex",
                               alignItems: "center",
@@ -913,7 +1055,7 @@ function App() {
                                   whiteSpace: "nowrap",
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
-                                  fontSize: "13.5px",
+                                  fontSize: "13px",
                                   color: C.ink,
                                   fontWeight: 500,
                                 }}
@@ -921,18 +1063,23 @@ function App() {
                                 {file.name}
                               </div>
                             </div>
-                            <span
+
+                            {/* Nút xóa File */}
+                            <button
+                              onClick={(e) => handleDeleteFile(file.id, e)}
                               style={{
-                                fontSize: "11px",
-                                backgroundColor: C.bg,
-                                padding: "4px 8px",
+                                border: "none",
+                                background: C.dangerSoft,
+                                color: C.danger,
+                                padding: "4px",
                                 borderRadius: "4px",
-                                color: C.inkMuted,
-                                fontWeight: 600,
+                                cursor: "pointer",
+                                display: "flex",
                               }}
+                              title="Xóa file này"
                             >
-                              {file.type}
-                            </span>
+                              <IconX />
+                            </button>
                           </div>
                         </a>
                       ))}
@@ -959,24 +1106,13 @@ function App() {
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
-        * { box-sizing: border-box; }
-        html, body { margin: 0; padding: 0; width: 100%; }
+        * { box-sizing: border-box; } html, body { margin: 0; padding: 0; width: 100%; }
         .nav-item:hover { background-color: ${C.accentSoft} !important; }
-        .task-header:hover { background-color: #FAFBFC !important; }
         .btn-secondary:hover { border-color: ${C.accent}; }
-        .btn-primary:hover { opacity: 0.92; }
-        button:focus-visible, .nav-item:focus-visible { outline: 2px solid ${C.accent}; outline-offset: 2px; }
-        ::-webkit-scrollbar { height: 6px; width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #CBD1D9; border-radius: 10px; }
-        @media (max-width: 880px) {
-          .main-grid { grid-template-columns: 1fr !important; }
-          .content-area { padding: 28px 20px !important; margin-left: 68px !important; }
-          .stats-row { grid-template-columns: 1fr !important; }
-        }
+        .file-card:hover { border-color: #CBD1D9 !important; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
       `}</style>
 
-      {/* === Sidebar === */}
+      {/* Sidebar */}
       <div
         style={{
           width: "76px",
@@ -995,8 +1131,8 @@ function App() {
       >
         <div
           style={{
-            width: "38px",
-            height: "38px",
+            width: "42px",
+            height: "42px",
             borderRadius: "10px",
             backgroundColor: C.accent,
             color: "#fff",
@@ -1005,12 +1141,11 @@ function App() {
             justifyContent: "center",
             fontFamily: "Manrope, sans-serif",
             fontWeight: 800,
-            fontSize: "15px",
+            fontSize: "14px",
           }}
         >
-          cx
+          HC
         </div>
-
         <div
           style={{
             flex: 1,
@@ -1022,10 +1157,13 @@ function App() {
             alignItems: "center",
           }}
         >
-          {navItems.map((item) => (
+          {[
+            { id: "home", icon: IconHome, label: "Tổng quan" },
+            { id: "tasks", icon: IconUsers, label: "Công việc" },
+            { id: "chat", icon: IconChat, label: "Trò chuyện" },
+          ].map((item) => (
             <div
               key={item.id}
-              tabIndex={0}
               onClick={() => setActiveNav(item.id)}
               className="nav-item"
               style={{
@@ -1047,29 +1185,10 @@ function App() {
             </div>
           ))}
         </div>
-        <button
-          className="nav-item"
-          style={{
-            width: "48px",
-            height: "48px",
-            borderRadius: "10px",
-            border: "none",
-            background: "none",
-            color: C.inkMuted,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          title="Ứng dụng khác"
-        >
-          <IconGrid />
-        </button>
       </div>
 
-      {/* === Nội dung chính === */}
+      {/* Main Content */}
       <div
-        className="content-area"
         style={{ marginLeft: "76px", padding: "40px 56px", maxWidth: "1280px" }}
       >
         {activeNav === "home" ? (
@@ -1084,11 +1203,12 @@ function App() {
               color: C.inkMuted,
             }}
           >
-            Giao diện đang được phát triển...
+            Đang phát triển...
           </div>
         )}
       </div>
-      {/* === HỘP THOẠI TẠO CÔNG VIỆC (MODAL) === */}
+
+      {/* Modal Thêm Việc */}
       {isModalOpen && (
         <div
           style={{
@@ -1120,9 +1240,8 @@ function App() {
                 fontFamily: "Manrope, sans-serif",
               }}
             >
-              Giao việc mới
+              Giao dự án mới
             </h2>
-
             <form
               onSubmit={handleCreateTask}
               style={{ display: "flex", flexDirection: "column", gap: "15px" }}
@@ -1137,7 +1256,7 @@ function App() {
                     color: C.inkMuted,
                   }}
                 >
-                  Tên công việc / Dự án
+                  Tên Dự án / Công việc
                 </label>
                 <input
                   required
@@ -1146,7 +1265,7 @@ function App() {
                   onChange={(e) =>
                     setNewTask({ ...newTask, title: e.target.value })
                   }
-                  placeholder="Ví dụ: Thi công PCCC Tòa nhà A..."
+                  placeholder="Nhập tên..."
                   style={{
                     width: "100%",
                     padding: "10px",
@@ -1156,7 +1275,6 @@ function App() {
                   }}
                 />
               </div>
-
               <div style={{ display: "flex", gap: "15px" }}>
                 <div style={{ flex: 1 }}>
                   <label
@@ -1184,10 +1302,9 @@ function App() {
                     }}
                   >
                     <option value="Hợp đồng">Hợp đồng</option>
-                    <option value="BBNT">Biên bản nghiệm thu (BBNT)</option>
+                    <option value="BBNT">Biên bản nghiệm thu</option>
                     <option value="Bản vẽ">Bản vẽ thiết kế</option>
-                    <option value="Khảo sát">Báo cáo khảo sát</option>
-                    <option value="Bảo trì">Bảo trì hệ thống</option>
+                    <option value="Khảo sát">Khảo sát / Bảo trì</option>
                   </select>
                 </div>
                 <div style={{ flex: 1 }}>
@@ -1200,7 +1317,7 @@ function App() {
                       color: C.inkMuted,
                     }}
                   >
-                    Hạn chót (Deadline)
+                    Deadline
                   </label>
                   <input
                     required
@@ -1220,7 +1337,6 @@ function App() {
                   />
                 </div>
               </div>
-
               <div
                 style={{
                   display: "flex",
@@ -1255,7 +1371,7 @@ function App() {
                     fontWeight: 600,
                   }}
                 >
-                  Lưu công việc
+                  Tạo mới
                 </button>
               </div>
             </form>
