@@ -240,7 +240,7 @@ const IconChevronDown = () => (
     stroke="currentColor"
     strokeWidth="2"
   >
-    <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M6 9l6 6 6-6" strokeLinuseEfecap="round" strokeLinejoin="round" />
   </svg>
 );
 const IconChevronUp = () => (
@@ -277,6 +277,7 @@ const API_URL = "https://quan-ly-hop-dong-smac.onrender.com/api";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
   const [activeNav, setActiveNav] = useState("home");
   const [selectedUser, setSelectedUser] = useState(mockUsers[0].id);
   const [expandedTask, setExpandedTask] = useState(null);
@@ -296,8 +297,14 @@ function App() {
       .then((res) => res.json())
       .then((data) => {
         setTasksData(data);
-        // Thêm độ trễ nhỏ 1s để người dùng nhìn thấy màn hình Loading đẹp mắt
-        setTimeout(() => setIsLoading(false), 1000);
+
+        // Bước 1: Giữ màn hình Loading 1 giây cho đẹp
+        setTimeout(() => {
+          setIsFadingOut(true); // Bắt đầu hiệu ứng mờ dần (Fade out)
+
+          // Bước 2: Đợi thêm 0.5 giây cho hiệu ứng mờ chạy xong thì mới xóa hẳn Loading Screen
+          setTimeout(() => setIsLoading(false), 500);
+        }, 1000);
       })
       .catch((err) => {
         console.error("Lỗi kết nối:", err);
@@ -434,16 +441,21 @@ function App() {
   // ==========================================
   if (isLoading) {
     return (
-      <div style={{ 
-        // Phối màu nền gradient khớp với logo S.M.A.C
-        backgroundImage: 'linear-gradient(135deg, #012A40 0%, #008782 100%)', 
-        height: '100vh', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        fontFamily: 'Manrope, sans-serif' 
-      }}>
+      <div
+        style={{
+          backgroundImage: "linear-gradient(135deg, #012A40 0%, #008782 100%)",
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "Manrope, sans-serif",
+
+          /* HIỆU ỨNG MỜ DẦN Ở ĐÂY */
+          opacity: isFadingOut ? 0 : 1,
+          transition: "opacity 0.5s ease-out",
+        }}
+      >
         <style>{`
           @keyframes pulse { 
             0% { opacity: 0.8; transform: scale(0.95); } 
@@ -452,28 +464,39 @@ function App() {
           }
           .loading-logo { animation: pulse 1.8s infinite ease-in-out; }
         `}</style>
-        
+
         {/* Hình ảnh Logo S.M.A.C */}
-        <div className="loading-logo" style={{ textAlign: 'center' }}>
-          <img 
-            src="/smac-logo-removebg-preview.png" 
-            alt="S.M.A.C Loading..." 
-            style={{ 
-              width: '220px', // Bạn có thể tăng giảm số này để chỉnh độ to/nhỏ của logo
-              height: 'auto',
-            }} 
+        <div className="loading-logo" style={{ textAlign: "center" }}>
+          <img
+            src="/smac-logo-removebg-preview.png"
+            alt="S.M.A.C Loading..."
+            style={{
+              width: "220px", // Bạn có thể tăng giảm số này để chỉnh độ to/nhỏ của logo
+              height: "auto",
+            }}
           />
         </div>
 
         {/* Thanh chạy tiến độ màu vàng đồng */}
-        <div style={{ marginTop: '30px', width: '200px', height: '4px', backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: '4px', overflow: 'hidden' }}>
-          <div style={{ 
-            width: '50%', 
-            height: '100%', 
-            backgroundColor: '#DAB866', // Màu vàng đồng trích xuất từ logo
-            borderRadius: '4px', 
-            animation: 'slide 1.2s infinite linear' 
-          }} />
+        <div
+          style={{
+            marginTop: "30px",
+            width: "200px",
+            height: "4px",
+            backgroundColor: "rgba(255,255,255,0.15)",
+            borderRadius: "4px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              width: "50%",
+              height: "100%",
+              backgroundColor: "#DAB866", // Màu vàng đồng trích xuất từ logo
+              borderRadius: "4px",
+              animation: "slide 1.2s infinite linear",
+            }}
+          />
         </div>
         <style>{`@keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }`}</style>
       </div>
@@ -1078,17 +1101,22 @@ function App() {
   );
 
   return (
-    <div
-      style={{
-        backgroundColor: C.bg,
-        minHeight: "100vh",
-        width: "100%",
-        fontFamily: "Inter, system-ui, sans-serif",
-        color: C.ink,
-      }}
-    >
+    <div style={{ 
+      backgroundColor: C.bg, minHeight: '100vh', width: '100%', 
+      fontFamily: 'Inter, system-ui, sans-serif', color: C.ink,
+      
+      /* HIỆU ỨNG HIỆN DẦN VÀ TRƯỢT LÊN CHO TRANG CHỦ */
+      animation: 'fadeInUp 0.6s ease-out forwards'
+    }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+        
+        /* Keyframe cho hiệu ứng chuyển cảnh */
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
         * { box-sizing: border-box; } html, body { margin: 0; padding: 0; width: 100%; }
         .nav-item:hover { background-color: ${C.accentSoft} !important; }
         .btn-secondary:hover { border-color: ${C.accent}; }
