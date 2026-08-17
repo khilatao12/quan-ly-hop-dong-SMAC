@@ -456,7 +456,7 @@ function App() {
         {/* Hình ảnh Logo S.M.A.C */}
         <div className="loading-logo" style={{ textAlign: 'center' }}>
           <img 
-            src="/smac-logo.png" 
+            src="/smac-logo.jpg" 
             alt="S.M.A.C Loading..." 
             style={{ 
               width: '180px', // Bạn có thể tăng giảm số này để chỉnh độ to/nhỏ của logo
