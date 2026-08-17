@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 
 // === Dữ liệu nhân sự mẫu ===
-const mockUsers = [
-  { id: "u1", name: "Trần Nam Phong", role: "admin", title: "Quản lý dự án" },
-  { id: "u2", name: "Nguyễn Văn A", role: "nhân sự", title: "Kỹ thuật viên" },
-  { id: "u3", name: "Lê Thị B", role: "nhân sự", title: "Hành chính dự án" },
+// === Dữ liệu nhân sự mẫu (Có tài khoản & Mật khẩu) ===
+const initialUsers = [
+  { id: 'u1', username: 'admin', password: '123', name: 'Trần Nam Phong', role: 'admin', title: 'Quản lý dự án' },
+  { id: 'u2', username: 'vana', password: '123', name: 'Nguyễn Văn A', role: 'nhân sự', title: 'Kỹ thuật viên' },
+  { id: 'u3', username: 'thib', password: '123', name: 'Lê Thị B', role: 'nhân sự', title: 'Kỹ thuật viên' },
 ];
 
 // === Bảng màu & token thiết kế ===
@@ -277,6 +278,36 @@ const API_URL = "https://quan-ly-hop-dong-smac.onrender.com/api";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
+
+  const [users, setUsers] = useState(initialUsers); // Quản lý danh sách user để có thể đổi mật khẩu tạm thời
+  const [authMode, setAuthMode] = useState('login'); // 'login' hoặc 'change_password'
+  const [authForm, setAuthForm] = useState({ username: '', password: '', newPassword: '' });
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    const user = users.find(u => u.username === authForm.username && u.password === authForm.password);
+    if (user) {
+      setCurrentUser(user);
+      setSelectedUser(user.id);
+    } else {
+      alert('Sai tên đăng nhập hoặc mật khẩu!');
+    }
+  };
+
+  const handleChangePassword = (e) => {
+    e.preventDefault();
+    const userIndex = users.findIndex(u => u.username === authForm.username && u.password === authForm.password);
+    if (userIndex !== -1) {
+      const updatedUsers = [...users];
+      updatedUsers[userIndex].password = authForm.newPassword;
+      setUsers(updatedUsers);
+      alert('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
+      setAuthMode('login');
+      setAuthForm({ username: '', password: '', newPassword: '' });
+    } else {
+      alert('Tài khoản hoặc mật khẩu cũ không đúng!');
+    }
+  };
   const [isLoading, setIsLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [activeNav, setActiveNav] = useState("home");
@@ -314,15 +345,15 @@ function App() {
   }, []);
 
   // Tính toán số liệu thực tế cho Dashboard
-  const totalTasks = tasksData.length;
-  const completedTasks = tasksData.filter(
-    (t) => t.status === "completed",
-  ).length;
+  // 1. Dữ liệu cho Dashboard (Tổng quan)
+  const dashboardTasks = currentUser?.role === 'admin' ? tasksData : tasksData.filter(t => t.userId === currentUser?.id);
+  const totalTasks = dashboardTasks.length;
+  const completedTasks = dashboardTasks.filter(t => t.status === 'completed').length;
   const pendingTasks = totalTasks - completedTasks;
 
-  const displayUserId =
-    currentUser?.role === "admin" ? selectedUser : currentUser?.id;
-  const userTasks = tasksData.filter((task) => task.userId === displayUserId);
+  // 2. Dữ liệu cho Tab Công việc
+  const displayUserId = currentUser?.role === 'admin' ? selectedUser : currentUser?.id;
+  const userTasks = tasksData.filter(task => task.userId === displayUserId);
 
   // --- CÁC HÀM XỬ LÝ API ---
   const handleCreateTask = async (e) => {
@@ -507,96 +538,44 @@ function App() {
   }
   if (!currentUser) {
     return (
-      <div
-        style={{
-          backgroundColor: C.bg,
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "Inter, sans-serif",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "#fff",
-            padding: "40px",
-            borderRadius: "16px",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-            width: "400px",
-          }}
-        >
-          <div style={{ textAlign: "center", marginBottom: "30px" }}>
-            <h2
-              style={{
-                margin: "0 0 8px 0",
-                fontFamily: "Manrope, sans-serif",
-                color: C.ink,
-                fontSize: "22px",
-              }}
-            >
-              Đăng nhập S.M.A.C
-            </h2>
-            <p style={{ margin: 0, color: C.inkMuted, fontSize: "14px" }}>
-              Vui lòng chọn tài khoản của bạn
-            </p>
+      <div style={{ backgroundImage: 'linear-gradient(135deg, #012A40 0%, #008782 100%)', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif' }}>
+        <div style={{ backgroundColor: '#fff', padding: '40px', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', width: '400px' }}>
+          
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+            <h2 style={{ margin: '0 0 8px 0', fontFamily: 'Manrope, sans-serif', color: C.accent, fontSize: '24px', fontWeight: 800 }}>S.M.A.C</h2>
+            <p style={{ margin: 0, color: C.inkMuted, fontSize: '14px' }}>Hệ thống Quản lý PCCC</p>
           </div>
 
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-          >
-            {mockUsers.map((user) => (
-              <button
-                key={user.id}
-                onClick={() => {
-                  setCurrentUser(user);
-                  setSelectedUser(user.id); // Đăng nhập xong thì tự động chọn đúng tên mình
-                }}
-                style={{
-                  padding: "16px",
-                  borderRadius: "10px",
-                  border: `1px solid ${C.border}`,
-                  backgroundColor: "#fff",
-                  cursor: "pointer",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  transition: "all 0.2s",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <span
-                    style={{ fontWeight: 600, color: C.ink, fontSize: "15px" }}
-                  >
-                    {user.name}
-                  </span>
-                  <span style={{ fontSize: "12px", color: C.inkFaint }}>
-                    {user.title}
-                  </span>
-                </div>
-                <span
-                  style={{
-                    fontSize: "12px",
-                    padding: "4px 8px",
-                    borderRadius: "6px",
-                    backgroundColor:
-                      user.role === "admin" ? C.warnSoft : C.blueSoft,
-                    color: user.role === "admin" ? C.warn : C.blue,
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {user.role}
-                </span>
-              </button>
-            ))}
+          {/* TAB CHUYỂN ĐỔI */}
+          <div style={{ display: 'flex', marginBottom: '24px', backgroundColor: C.bg, borderRadius: '8px', padding: '4px' }}>
+            <button onClick={() => setAuthMode('login')} style={{ flex: 1, padding: '10px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '13px', transition: '0.2s', backgroundColor: authMode === 'login' ? '#fff' : 'transparent', color: authMode === 'login' ? C.ink : C.inkMuted, boxShadow: authMode === 'login' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none' }}>Đăng nhập</button>
+            <button onClick={() => setAuthMode('change_password')} style={{ flex: 1, padding: '10px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '13px', transition: '0.2s', backgroundColor: authMode === 'change_password' ? '#fff' : 'transparent', color: authMode === 'change_password' ? C.ink : C.inkMuted, boxShadow: authMode === 'change_password' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none' }}>Đổi mật khẩu</button>
           </div>
+
+          {/* FORM XỬ LÝ */}
+          <form onSubmit={authMode === 'login' ? handleLogin : handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: C.inkMuted }}>TÀI KHOẢN</label>
+              <input required type="text" value={authForm.username} onChange={e => setAuthForm({...authForm, username: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${C.border}`, outline: 'none', fontSize: '14px' }} placeholder="Nhập tên tài khoản..." />
+            </div>
+            
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: C.inkMuted }}>{authMode === 'login' ? 'MẬT KHẨU' : 'MẬT KHẨU CŨ'}</label>
+              <input required type="password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${C.border}`, outline: 'none', fontSize: '14px' }} placeholder="Nhập mật khẩu..." />
+            </div>
+
+            {authMode === 'change_password' && (
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: C.inkMuted }}>MẬT KHẨU MỚI</label>
+                <input required type="password" value={authForm.newPassword} onChange={e => setAuthForm({...authForm, newPassword: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${C.border}`, outline: 'none', fontSize: '14px' }} placeholder="Mật khẩu mới..." />
+              </div>
+            )}
+
+            <button type="submit" style={{ marginTop: '10px', width: '100%', padding: '14px', borderRadius: '8px', border: 'none', backgroundColor: C.accent, color: '#fff', fontWeight: 700, fontSize: '15px', cursor: 'pointer' }}>
+              {authMode === 'login' ? 'Truy cập hệ thống' : 'Cập nhật mật khẩu'}
+            </button>
+          </form>
+
         </div>
       </div>
     );
@@ -825,7 +804,7 @@ function App() {
           Cập nhật Mới nhất
         </h2>
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {tasksData
+          {dashboardTasks
             .slice(-4)
             .reverse()
             .map((task) => (
