@@ -277,7 +277,7 @@ function App() {
   const handleCreateTask = async (e) => {
     e.preventDefault(); // Ngăn trình duyệt tải lại trang khi bấm submit
     try {
-      const response = await fetch("http://localhost:5000/api/tasks", {
+      const response = await fetch("https://quan-ly-hop-dong-smac.onrender.com/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -305,7 +305,7 @@ function App() {
     setTasksData(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
 
     try {
-      await fetch(`http://localhost:5000/api/tasks/${taskId}/status`, {
+      await fetch(`https://quan-ly-hop-dong-smac.onrender.com/api/tasks/${taskId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
@@ -321,7 +321,7 @@ function App() {
     if (!window.confirm("Bạn có chắc chắn muốn xóa công việc này? Mọi file đính kèm sẽ bị xóa theo.")) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+      const response = await fetch(`https://quan-ly-hop-dong-smac.onrender.com/api/tasks/${taskId}`, {
         method: 'DELETE'
       });
       if (response.ok) {
@@ -335,7 +335,7 @@ function App() {
   // --------------------------------
   // Tự động gọi API khi giao diện vừa tải xong
   useEffect(() => {
-    fetch("http://localhost:5000/api/tasks")
+    fetch("https://quan-ly-hop-dong-smac.onrender.com/api/tasks")
       .then((response) => response.json()) // Biến dữ liệu thô thành định dạng web hiểu được
       .then((data) => {
         setTasksData(data); // Đổ dữ liệu vào state
@@ -358,7 +358,7 @@ function App() {
     try {
       alert(`Đang tải file ${file.name} lên hệ thống... Vui lòng đợi.`);
 
-      const response = await fetch("http://localhost:5000/api/upload", {
+      const response = await fetch("https://quan-ly-hop-dong-smac.onrender.com/api/upload", {
         method: "POST",
         body: formData,
       });
