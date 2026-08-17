@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 // === Dữ liệu nhân sự mẫu ===
 // === Dữ liệu nhân sự mẫu (Có tài khoản & Mật khẩu) ===
-const initialUsers = [
+const mockUsers = [
   { id: 'u1', username: 'admin', password: '123', name: 'Trần Nam Phong', role: 'admin', title: 'Quản lý dự án' },
   { id: 'u2', username: 'vana', password: '123', name: 'Nguyễn Văn A', role: 'nhân sự', title: 'Kỹ thuật viên' },
   { id: 'u3', username: 'thib', password: '123', name: 'Lê Thị B', role: 'nhân sự', title: 'Kỹ thuật viên' },
