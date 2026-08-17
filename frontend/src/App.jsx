@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 
 // === Dữ liệu nhân sự mẫu ===
 const mockUsers = [
-  { id: "u1", name: "Trần Nam Phong", role: "Kỹ thuật viên" },
-  { id: "u2", name: "Nguyễn Văn A", role: "Chỉ huy trưởng" },
-  { id: "u3", name: "Lê Thị B", role: "Hành chính dự án" },
+  { id: "u1", name: "Trần Nam Phong", role: "admin", title: "Quản lý dự án" },
+  { id: "u2", name: "Nguyễn Văn A", role: "nhân sự", title: "Kỹ thuật viên" },
+  { id: "u3", name: "Lê Thị B", role: "nhân sự", title: "Hành chính dự án" },
 ];
 
 // === Bảng màu & token thiết kế ===
@@ -276,6 +276,7 @@ const IconX = () => (
 const API_URL = "https://quan-ly-hop-dong-smac.onrender.com/api";
 
 function App() {
+  const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [activeNav, setActiveNav] = useState("home");
@@ -319,7 +320,9 @@ function App() {
   ).length;
   const pendingTasks = totalTasks - completedTasks;
 
-  const userTasks = tasksData.filter((task) => task.userId === selectedUser);
+  const displayUserId =
+    currentUser?.role === "admin" ? selectedUser : currentUser?.id;
+  const userTasks = tasksData.filter((task) => task.userId === displayUserId);
 
   // --- CÁC HÀM XỬ LÝ API ---
   const handleCreateTask = async (e) => {
@@ -502,7 +505,102 @@ function App() {
       </div>
     );
   }
+  if (!currentUser) {
+    return (
+      <div
+        style={{
+          backgroundColor: C.bg,
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "Inter, sans-serif",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "#fff",
+            padding: "40px",
+            borderRadius: "16px",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+            width: "400px",
+          }}
+        >
+          <div style={{ textAlign: "center", marginBottom: "30px" }}>
+            <h2
+              style={{
+                margin: "0 0 8px 0",
+                fontFamily: "Manrope, sans-serif",
+                color: C.ink,
+                fontSize: "22px",
+              }}
+            >
+              Đăng nhập S.M.A.C
+            </h2>
+            <p style={{ margin: 0, color: C.inkMuted, fontSize: "14px" }}>
+              Vui lòng chọn tài khoản của bạn
+            </p>
+          </div>
 
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+          >
+            {mockUsers.map((user) => (
+              <button
+                key={user.id}
+                onClick={() => {
+                  setCurrentUser(user);
+                  setSelectedUser(user.id); // Đăng nhập xong thì tự động chọn đúng tên mình
+                }}
+                style={{
+                  padding: "16px",
+                  borderRadius: "10px",
+                  border: `1px solid ${C.border}`,
+                  backgroundColor: "#fff",
+                  cursor: "pointer",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  transition: "all 0.2s",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <span
+                    style={{ fontWeight: 600, color: C.ink, fontSize: "15px" }}
+                  >
+                    {user.name}
+                  </span>
+                  <span style={{ fontSize: "12px", color: C.inkFaint }}>
+                    {user.title}
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontSize: "12px",
+                    padding: "4px 8px",
+                    borderRadius: "6px",
+                    backgroundColor:
+                      user.role === "admin" ? C.warnSoft : C.blueSoft,
+                    color: user.role === "admin" ? C.warn : C.blue,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {user.role}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
   // ==========================================
   // GIAO DIỆN TRANG CHỦ (DASHBOARD)
   // ==========================================
@@ -802,39 +900,19 @@ function App() {
 
       <div style={cardStyle}>
         {/* Chọn nhân sự */}
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            borderBottom: `1px solid ${C.border}`,
-            paddingBottom: "20px",
-            marginBottom: "24px",
-            overflowX: "auto",
-          }}
-        >
-          {mockUsers.map((user) => (
-            <button
-              key={user.id}
-              onClick={() => setSelectedUser(user.id)}
-              style={{
-                padding: "10px 18px",
-                borderRadius: "30px",
-                fontWeight: 600,
-                fontSize: "14px",
-                cursor: "pointer",
-                border: "none",
-                transition: "all 0.2s",
-                backgroundColor: selectedUser === user.id ? C.accent : C.bg,
-                color: selectedUser === user.id ? "#fff" : C.inkMuted,
-              }}
-            >
-              {user.name}{" "}
-              <span style={{ fontWeight: 400, opacity: 0.8 }}>
-                - {user.role}
-              </span>
-            </button>
-          ))}
-        </div>
+        {/* Chỉ ADMIN mới thấy thanh chọn nhân sự này */}
+        {currentUser.role === 'admin' && (
+          <div style={{ display: 'flex', gap: '12px', borderBottom: `1px solid ${C.border}`, paddingBottom: '20px', marginBottom: '24px', overflowX: 'auto' }}>
+            {mockUsers.map(user => (
+              <button key={user.id} onClick={() => setSelectedUser(user.id)} style={{
+                padding: '10px 18px', borderRadius: '30px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', border: 'none', transition: 'all 0.2s',
+                backgroundColor: selectedUser === user.id ? C.accent : C.bg, color: selectedUser === user.id ? '#fff' : C.inkMuted,
+              }}>
+                {user.name} <span style={{ fontWeight: 400, opacity: 0.8 }}>- {user.title}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         <div
           style={{
@@ -1101,13 +1179,18 @@ function App() {
   );
 
   return (
-    <div style={{ 
-      backgroundColor: C.bg, minHeight: '100vh', width: '100%', 
-      fontFamily: 'Inter, system-ui, sans-serif', color: C.ink,
-      
-      /* HIỆU ỨNG HIỆN DẦN VÀ TRƯỢT LÊN CHO TRANG CHỦ */
-      animation: 'fadeInUp 0.6s ease-out forwards'
-    }}>
+    <div
+      style={{
+        backgroundColor: C.bg,
+        minHeight: "100vh",
+        width: "100%",
+        fontFamily: "Inter, system-ui, sans-serif",
+        color: C.ink,
+
+        /* HIỆU ỨNG HIỆN DẦN VÀ TRƯỢT LÊN CHO TRANG CHỦ */
+        animation: "fadeInUp 0.6s ease-out forwards",
+      }}
+    >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
         
