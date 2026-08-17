@@ -434,63 +434,48 @@ function App() {
   // ==========================================
   if (isLoading) {
     return (
-      <div
-        style={{
-          backgroundColor: C.accent,
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "Manrope, sans-serif",
-        }}
-      >
+      <div style={{ 
+        // Phối màu nền gradient khớp với logo S.M.A.C
+        backgroundImage: 'linear-gradient(135deg, #012A40 0%, #008782 100%)', 
+        height: '100vh', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        fontFamily: 'Manrope, sans-serif' 
+      }}>
         <style>{`
-          @keyframes pulse { 0% { opacity: 0.6; transform: scale(0.98); } 50% { opacity: 1; transform: scale(1); } 100% { opacity: 0.6; transform: scale(0.98); } }
-          .loading-logo { animation: pulse 1.5s infinite ease-in-out; }
+          @keyframes pulse { 
+            0% { opacity: 0.8; transform: scale(0.95); } 
+            50% { opacity: 1; transform: scale(1.02); } 
+            100% { opacity: 0.8; transform: scale(0.95); } 
+          }
+          .loading-logo { animation: pulse 1.8s infinite ease-in-out; }
         `}</style>
-        <div className="loading-logo" style={{ textAlign: "center" }}>
-          <div
-            style={{
-              color: "#fff",
-              fontSize: "56px",
-              fontWeight: 800,
-              letterSpacing: "4px",
-              marginBottom: "8px",
-            }}
-          >
-            HACOM
-          </div>
-          <div
-            style={{
-              color: C.accentSoft,
-              fontSize: "16px",
-              fontWeight: 500,
-              letterSpacing: "2px",
-            }}
-          >
-            HỆ THỐNG QUẢN LÝ PCCC
-          </div>
-        </div>
-        <div
-          style={{
-            marginTop: "40px",
-            width: "200px",
-            height: "4px",
-            backgroundColor: "rgba(255,255,255,0.2)",
-            borderRadius: "4px",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              width: "50%",
-              height: "100%",
-              backgroundColor: "#fff",
-              borderRadius: "4px",
-              animation: "slide 1s infinite linear",
-            }}
+        
+        {/* Hình ảnh Logo S.M.A.C */}
+        <div className="loading-logo" style={{ textAlign: 'center' }}>
+          <img 
+            src="/smac-logo.png" 
+            alt="S.M.A.C Loading..." 
+            style={{ 
+              width: '180px', // Bạn có thể tăng giảm số này để chỉnh độ to/nhỏ của logo
+              height: 'auto',
+              borderRadius: '16px', // Bo góc nhẹ nếu ảnh là hình vuông
+              boxShadow: '0 8px 32px rgba(0,0,0,0.2)' // Thêm bóng đổ cho logo nổi bật
+            }} 
           />
+        </div>
+
+        {/* Thanh chạy tiến độ màu vàng đồng */}
+        <div style={{ marginTop: '30px', width: '200px', height: '4px', backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: '4px', overflow: 'hidden' }}>
+          <div style={{ 
+            width: '50%', 
+            height: '100%', 
+            backgroundColor: '#DAB866', // Màu vàng đồng trích xuất từ logo
+            borderRadius: '4px', 
+            animation: 'slide 1.2s infinite linear' 
+          }} />
         </div>
         <style>{`@keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }`}</style>
       </div>
