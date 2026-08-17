@@ -273,7 +273,7 @@ const IconX = () => (
 );
 
 // Hãy đổi link này thành link Render Backend của bạn nếu đang đưa lên mạng
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://quan-ly-hop-dong-smac.onrender.com/api";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -456,10 +456,10 @@ function App() {
         {/* Hình ảnh Logo S.M.A.C */}
         <div className="loading-logo" style={{ textAlign: 'center' }}>
           <img 
-            src="/smac-logo.jpg" 
+            src="/smac-logo-removebg-preview.png" 
             alt="S.M.A.C Loading..." 
             style={{ 
-              width: '180px', // Bạn có thể tăng giảm số này để chỉnh độ to/nhỏ của logo
+              width: '220px', // Bạn có thể tăng giảm số này để chỉnh độ to/nhỏ của logo
               height: 'auto',
               borderRadius: '16px', // Bo góc nhẹ nếu ảnh là hình vuông
               boxShadow: '0 8px 32px rgba(0,0,0,0.2)' // Thêm bóng đổ cho logo nổi bật
