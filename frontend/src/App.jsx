@@ -89,6 +89,18 @@ const IconEye = () => (
     <circle cx="12" cy="12" r="3" />
   </svg>
 );
+const IconEyeOff = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22" />
+  </svg>
+);
 const IconShield = () => (
   <svg
     width="18"
@@ -359,7 +371,8 @@ function App() {
     password: "",
     newPassword: "",
   });
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const handleLogin = (e) => {
     e.preventDefault();
     const user = users.find(
@@ -655,7 +668,7 @@ function App() {
                 fontWeight: 800,
               }}
             >
-              Hệ thống Quản lý
+              HỆ THỐNG QUẢN LÝ
             </h2>
             <p
               style={{
@@ -796,7 +809,7 @@ function App() {
                     outline: "none",
                     fontSize: "15px",
                     backgroundColor: "transparent",
-                    color: "black"
+                    color: "black",
                   }}
                   placeholder="Username"
                 />
@@ -841,9 +854,10 @@ function App() {
                 >
                   <IconLock />
                 </div>
+
                 <input
                   required
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={authForm.password}
                   onChange={(e) =>
                     setAuthForm({ ...authForm, password: e.target.value })
@@ -855,12 +869,14 @@ function App() {
                     outline: "none",
                     fontSize: "15px",
                     backgroundColor: "transparent",
-                    letterSpacing: "2px",
-                    color: "black"
+                    letterSpacing: showPassword ? "normal" : "2px",
                   }}
-                  placeholder="Password"
+                  placeholder="••••"
                 />
+
+                {/* Nút bấm ẩn/hiện */}
                 <div
+                  onClick={() => setShowPassword(!showPassword)}
                   style={{
                     width: "52px",
                     display: "flex",
@@ -870,12 +886,12 @@ function App() {
                     cursor: "pointer",
                   }}
                 >
-                  <IconEye />
+                  {showPassword ? <IconEyeOff /> : <IconEye />}
                 </div>
               </div>
             </div>
 
-            {/* Input Mật khẩu mới */}
+            {/* Input Mật khẩu mới (chỉ hiện khi ở tab Đổi mật khẩu) */}
             {authMode === "change_password" && (
               <div>
                 <label
@@ -914,9 +930,10 @@ function App() {
                   >
                     <IconLock />
                   </div>
+
                   <input
                     required
-                    type="password"
+                    type={showNewPassword ? "text" : "password"}
                     value={authForm.newPassword}
                     onChange={(e) =>
                       setAuthForm({ ...authForm, newPassword: e.target.value })
@@ -928,10 +945,25 @@ function App() {
                       outline: "none",
                       fontSize: "15px",
                       backgroundColor: "transparent",
-                      letterSpacing: "2px",
+                      letterSpacing: showNewPassword ? "normal" : "2px",
                     }}
                     placeholder="••••"
                   />
+
+                  {/* Nút bấm ẩn/hiện */}
+                  <div
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    style={{
+                      width: "52px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#94A3B8",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {showNewPassword ? <IconEyeOff /> : <IconEye />}
+                  </div>
                 </div>
               </div>
             )}
