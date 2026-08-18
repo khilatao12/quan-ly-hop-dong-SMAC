@@ -647,15 +647,9 @@ function App() {
           }}
         >
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <img
-              src="/smac-logo.jpg"
-              alt="S.M.A.C Logo"
-              style={{ height: "100px", marginBottom: "16px" }}
-            />
             <h2
               style={{
                 margin: "0 0 8px 0",
-                fontFamily: "Manrope, sans-serif",
                 color: "#0F4C5C",
                 fontSize: "24px",
                 fontWeight: 800,
@@ -802,8 +796,9 @@ function App() {
                     outline: "none",
                     fontSize: "15px",
                     backgroundColor: "transparent",
+                    color: "black"
                   }}
-                  placeholder="admin"
+                  placeholder="Username"
                 />
               </div>
             </div>
@@ -861,8 +856,9 @@ function App() {
                     fontSize: "15px",
                     backgroundColor: "transparent",
                     letterSpacing: "2px",
+                    color: "black"
                   }}
-                  placeholder="••••"
+                  placeholder="Password"
                 />
                 <div
                   style={{
