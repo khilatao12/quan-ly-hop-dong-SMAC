@@ -1837,7 +1837,7 @@ function App() {
         >
           {[
             { id: "home", icon: IconHome, label: "Tổng quan" },
-            { id: "tasks", icon: IconFolder, label: "Công việc" },
+            { id: "tasks", icon: IconDocs, label: "Công việc" },
           ].map((item) => (
             <div
               key={item.id}
