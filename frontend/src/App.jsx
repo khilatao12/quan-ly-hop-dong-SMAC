@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 // === Dữ liệu nhân sự mẫu ===
 // === Dữ liệu nhân sự mẫu (Có tài khoản & Mật khẩu) ===
-const initialUsers = [
+const usersList = [
   {
     id: "u1",
     username: "admin",
@@ -61,6 +61,20 @@ const IconUser = () => (
   >
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
     <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+const IconLogout = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
   </svg>
 );
 const IconLock = () => (
@@ -362,9 +376,15 @@ const IconX = () => (
 const API_URL = "https://quan-ly-hop-dong-smac.onrender.com/api";
 
 function App() {
-  const [currentUser, setCurrentUser] = useState(null);
-
-  const [users, setUsers] = useState(initialUsers); // Quản lý danh sách user để có thể đổi mật khẩu tạm thời
+  const [currentUser, setCurrentUser] = useState(() => {
+    const saved = localStorage.getItem('smac_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+  
+  const [usersList, setUsersList] = useState([]);
+  useEffect(() => {
+    fetch(`${API_URL}/users`).then(res => res.json()).then(data => setUsersList(data));
+  }, []);
   const [authMode, setAuthMode] = useState("login"); // 'login' hoặc 'change_password'
   const [authForm, setAuthForm] = useState({
     username: "",
@@ -373,41 +393,50 @@ function App() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const user = users.find(
-      (u) =>
-        u.username === authForm.username && u.password === authForm.password,
-    );
-    if (user) {
-      setCurrentUser(user);
-      setSelectedUser(user.id);
-    } else {
-      alert("Sai tên đăng nhập hoặc mật khẩu!");
-    }
+    try {
+      const res = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: authForm.username, password: authForm.password })
+      });
+      if (res.ok) {
+        const user = await res.json();
+        setCurrentUser(user);
+        setSelectedUser(user.id);
+        localStorage.setItem('smac_user', JSON.stringify(user)); // Lưu vào trình duyệt
+      } else {
+        alert('Sai tên đăng nhập hoặc mật khẩu!');
+      }
+    } catch (err) { console.error(err); }
   };
 
-  const handleChangePassword = (e) => {
+  const handleChangePassword = async (e) => {
     e.preventDefault();
-    const userIndex = users.findIndex(
-      (u) =>
-        u.username === authForm.username && u.password === authForm.password,
-    );
-    if (userIndex !== -1) {
-      const updatedUsers = [...users];
-      updatedUsers[userIndex].password = authForm.newPassword;
-      setUsers(updatedUsers);
-      alert("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
-      setAuthMode("login");
-      setAuthForm({ username: "", password: "", newPassword: "" });
-    } else {
-      alert("Tài khoản hoặc mật khẩu cũ không đúng!");
-    }
+    try {
+      const res = await fetch(`${API_URL}/change-password`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: authForm.username, oldPassword: authForm.password, newPassword: authForm.newPassword })
+      });
+      if (res.ok) {
+        alert('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
+        setAuthMode('login');
+        setAuthForm({ username: '', password: '', newPassword: '' });
+      } else {
+        alert('Tài khoản hoặc mật khẩu cũ không đúng!');
+      }
+    } catch (err) { console.error(err); }
+  };
+  const handleLogout = () => {
+    localStorage.removeItem('smac_user'); // Xóa bộ nhớ
+    setCurrentUser(null); // Đẩy ra màn hình Login
   };
   const [isLoading, setIsLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [activeNav, setActiveNav] = useState("home");
-  const [selectedUser, setSelectedUser] = useState(initialUsers[0].id);
+  const [selectedUser, setSelectedUser] = useState(usersList[0].id);
   const [expandedTask, setExpandedTask] = useState(null);
   const [tasksData, setTasksData] = useState([]);
 
@@ -870,7 +899,7 @@ function App() {
                     fontSize: "15px",
                     backgroundColor: "transparent",
                     letterSpacing: showPassword ? "normal" : "2px",
-                    color: "black"
+                    color: "black",
                   }}
                   placeholder="Password"
                 />
@@ -947,7 +976,7 @@ function App() {
                       fontSize: "15px",
                       backgroundColor: "transparent",
                       letterSpacing: showNewPassword ? "normal" : "2px",
-                      color: "black"
+                      color: "black",
                     }}
                     placeholder="New password"
                   />
@@ -1317,7 +1346,7 @@ function App() {
               overflowX: "auto",
             }}
           >
-            {initialUsers.map((user) => (
+            {usersList.map((user) => (
               <button
                 key={user.id}
                 onClick={() => setSelectedUser(user.id)}

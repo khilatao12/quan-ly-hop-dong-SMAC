@@ -43,7 +43,7 @@ app.get('/api/tasks', async (req, res) => {
 
     // 4. Trả dữ liệu đã ghép nối hoàn chỉnh về cho Frontend
     res.json(formattedTasks);
-    
+
   } catch (error) {
     console.error("Lỗi khi kéo dữ liệu từ Supabase:", error);
     res.status(500).json({ error: 'Lỗi máy chủ Backend' });
@@ -58,8 +58,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.post('/api/upload', upload.single('pdfFile'), async (req, res) => {
   try {
     const file = req.file;
-    const taskId = req.body.taskId; 
-    
+    const taskId = req.body.taskId;
+
     if (!file) return res.status(400).json({ error: 'Không tìm thấy file tải lên!' });
 
     // 1. Dịch lại đúng font tiếng Việt do Multer làm lỗi
@@ -114,11 +114,11 @@ app.post('/api/tasks', async (req, res) => {
     const { data, error } = await supabase
       .from('tasks')
       .insert([
-        { 
-          user_id: userId, 
-          title: title, 
-          label: label, 
-          date_str: date, 
+        {
+          user_id: userId,
+          title: title,
+          label: label,
+          date_str: date,
           status: 'pending' // Mặc định việc mới tạo sẽ ở trạng thái chờ xử lý
         }
       ])
@@ -156,7 +156,7 @@ app.put('/api/tasks/:id/status', async (req, res) => {
 app.delete('/api/tasks/:id', async (req, res) => {
   try {
     const taskId = req.params.id;
-    
+
     // Lưu ý: Các file đính kèm trong bảng 'files' sẽ tự động bị xóa theo nhờ thiết lập CASCADE lúc tạo bảng
     const { data, error } = await supabase
       .from('tasks')
@@ -186,6 +186,41 @@ app.delete('/api/files/:id', async (req, res) => {
     console.error("Lỗi khi xóa file:", error);
     res.status(500).json({ error: 'Lỗi server khi xóa file' });
   }
+});
+// --- API LẤY DANH SÁCH NHÂN SỰ ---
+app.get('/api/users', async (req, res) => {
+  const { data, error } = await supabase.from('users').select('id, name, title, role');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// --- API ĐĂNG NHẬP ---
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('username', username)
+    .eq('password', password)
+    .single(); // Lấy 1 bản ghi duy nhất khớp tài khoản & mật khẩu
+
+  if (error || !data) return res.status(401).json({ error: 'Sai tài khoản hoặc mật khẩu' });
+  res.json(data);
+});
+
+// --- API ĐỔI MẬT KHẨU ---
+app.put('/api/change-password', async (req, res) => {
+  const { username, oldPassword, newPassword } = req.body;
+
+  // 1. Kiểm tra mật khẩu cũ
+  const { data, error } = await supabase.from('users').select('id').eq('username', username).eq('password', oldPassword).single();
+  if (error || !data) return res.status(401).json({ error: 'Mật khẩu cũ không đúng' });
+
+  // 2. Cập nhật mật khẩu mới
+  const { error: updateError } = await supabase.from('users').update({ password: newPassword }).eq('id', data.id);
+  if (updateError) return res.status(500).json({ error: 'Lỗi khi cập nhật' });
+
+  res.json({ message: 'Thành công' });
 });
 // Bật máy chủ lắng nghe kết nối
 app.listen(PORT, () => {
