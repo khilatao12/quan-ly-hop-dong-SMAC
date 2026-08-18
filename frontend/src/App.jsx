@@ -1103,7 +1103,7 @@ function App() {
           <div
             style={{ color: C.inkMuted, fontSize: "14px", marginTop: "6px" }}
           >
-            Theo dõi tiến độ các hạng mục PCCC.
+            Theo dõi tiến độ Công việc.
           </div>
         </div>
         <div
@@ -1375,7 +1375,7 @@ function App() {
           Quản lý Hợp đồng & Hồ sơ
         </h1>
         <div style={{ color: C.inkMuted, fontSize: "14px" }}>
-          Lựa chọn nhân sự để kiểm tra tiến độ và tài liệu đính kèm.
+          Công việc và tài liệu đính kèm.
         </div>
       </div>
 
@@ -1759,7 +1759,6 @@ function App() {
           {[
             { id: "home", icon: IconHome, label: "Tổng quan" },
             { id: "tasks", icon: IconUsers, label: "Công việc" },
-            { id: "chat", icon: IconChat, label: "Trò chuyện" },
           ].map((item) => (
             <div
               key={item.id}
