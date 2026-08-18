@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 
 // === Dữ liệu nhân sự mẫu ===
 // === Dữ liệu nhân sự mẫu (Có tài khoản & Mật khẩu) ===
@@ -62,6 +62,40 @@ const IconUser = () => (
   >
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
     <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+const IconLoginArrow = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+    <polyline points="10 17 15 12 10 7" />
+    <line x1="15" y1="12" x2="3" y2="12" />
+  </svg>
+);
+const IconDocs = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+    <polyline points="14 2 14 8 20 8"></polyline>
+    <path d="M16 13H8"></path>
+    <path d="M16 17H8"></path>
+    <path d="M10 9H8"></path>
   </svg>
 );
 const IconLogout = () => (
@@ -501,65 +535,87 @@ function App() {
   const userTasks = tasksData.filter((task) => task.userId === displayUserId);
 
   // --- CÁC HÀM XỬ LÝ API ---
- const handleCreateTask = async (e) => {
+  const handleCreateTask = async (e) => {
     e.preventDefault();
     try {
       const response = await fetch(`${API_URL}/tasks`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...newTask, userId: selectedUser }),
       });
       if (response.ok) {
         setIsModalOpen(false);
-        setNewTask({ title: '', label: 'Hợp đồng', date: '' });
-        
+        setNewTask({ title: "", label: "Hợp đồng", date: "" });
+
         // Tải lại ngầm dữ liệu để cập nhật giao diện ngay lập tức
         const res = await fetch(`${API_URL}/tasks`);
         const newData = await res.json();
         setTasksData(newData);
 
-        Swal.fire({ icon: 'success', title: 'Đã giao việc!', timer: 1500, showConfirmButton: false });
+        Swal.fire({
+          icon: "success",
+          title: "Đã giao việc!",
+          timer: 1500,
+          showConfirmButton: false,
+        });
       }
     } catch (error) {
-      Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể tạo công việc' });
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Không thể tạo công việc",
+      });
     }
   };
 
   const handleToggleStatus = async (taskId, currentStatus, e) => {
     e.stopPropagation();
-    const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
-    setTasksData(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+    const newStatus = currentStatus === "completed" ? "pending" : "completed";
+    setTasksData((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)),
+    );
     try {
       await fetch(`${API_URL}/tasks/${taskId}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
       });
-    } catch (error) { console.error('Lỗi đổi trạng thái:', error); }
+    } catch (error) {
+      console.error("Lỗi đổi trạng thái:", error);
+    }
   };
 
   const handleDeleteTask = async (taskId, e) => {
-    e.stopPropagation(); 
-    
+    e.stopPropagation();
+
     // Popup xác nhận siêu đẹp
     const result = await Swal.fire({
-      title: 'Xóa dự án này?',
+      title: "Xóa dự án này?",
       text: "Mọi file PDF đính kèm sẽ bị xóa vĩnh viễn!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#DC2626',
-      cancelButtonText: 'Hủy',
-      confirmButtonText: 'Xóa ngay'
+      confirmButtonColor: "#DC2626",
+      cancelButtonText: "Hủy",
+      confirmButtonText: "Xóa ngay",
     });
 
     if (result.isConfirmed) {
       try {
-        const res = await fetch(`${API_URL}/tasks/${taskId}`, { method: 'DELETE' });
+        const res = await fetch(`${API_URL}/tasks/${taskId}`, {
+          method: "DELETE",
+        });
         if (res.ok) {
-          setTasksData(prev => prev.filter(t => t.id !== taskId)); // Xóa ngay trên giao diện
-          Swal.fire({ icon: 'success', title: 'Đã xóa!', timer: 1500, showConfirmButton: false });
+          setTasksData((prev) => prev.filter((t) => t.id !== taskId)); // Xóa ngay trên giao diện
+          Swal.fire({
+            icon: "success",
+            title: "Đã xóa!",
+            timer: 1500,
+            showConfirmButton: false,
+          });
         }
-      } catch (error) { console.error('Lỗi xóa việc:', error); }
+      } catch (error) {
+        console.error("Lỗi xóa việc:", error);
+      }
     }
   };
 
@@ -569,19 +625,21 @@ function App() {
 
     // Bật Popup Loading
     Swal.fire({
-      title: 'Đang tải lên...',
+      title: "Đang tải lên...",
       text: `Hệ thống đang xử lý ${files.length} tài liệu, vui lòng chờ!`,
       allowOutsideClick: false,
-      didOpen: () => { Swal.showLoading(); }
+      didOpen: () => {
+        Swal.showLoading();
+      },
     });
 
     try {
       // Cho phép Backend cũ xử lý mượt bằng cách gửi ngầm từng file một trong vòng lặp
       for (let i = 0; i < files.length; i++) {
         const formData = new FormData();
-        formData.append('pdfFile', files[i]);
-        formData.append('taskId', taskId);
-        await fetch(`${API_URL}/upload`, { method: 'POST', body: formData });
+        formData.append("pdfFile", files[i]);
+        formData.append("taskId", taskId);
+        await fetch(`${API_URL}/upload`, { method: "POST", body: formData });
       }
 
       // Xong thì tải ngầm lại danh sách tasks để lấy link file mới
@@ -589,38 +647,59 @@ function App() {
       const newData = await res.json();
       setTasksData(newData);
 
-      Swal.fire({ icon: 'success', title: 'Thành công!', text: `Đã lưu ${files.length} file.`, timer: 1500, showConfirmButton: false });
-    } catch (error) { 
-      Swal.fire({ icon: 'error', title: 'Lỗi upload', text: 'Đường truyền không ổn định' });
+      Swal.fire({
+        icon: "success",
+        title: "Thành công!",
+        text: `Đã lưu ${files.length} file.`,
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi upload",
+        text: "Đường truyền không ổn định",
+      });
     } finally {
-      event.target.value = ''; // Reset input để có thể up tiếp file cùng tên
+      event.target.value = ""; // Reset input để có thể up tiếp file cùng tên
     }
   };
 
   const handleDeleteFile = async (fileId, e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     e.stopPropagation();
-    
+
     const result = await Swal.fire({
-      title: 'Xóa tài liệu này?',
-      icon: 'question',
+      title: "Xóa tài liệu này?",
+      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: '#DC2626',
-      confirmButtonText: 'Đồng ý',
-      cancelButtonText: 'Hủy'
+      confirmButtonColor: "#DC2626",
+      confirmButtonText: "Đồng ý",
+      cancelButtonText: "Hủy",
     });
 
     if (result.isConfirmed) {
       try {
-        const res = await fetch(`${API_URL}/files/${fileId}`, { method: 'DELETE' });
+        const res = await fetch(`${API_URL}/files/${fileId}`, {
+          method: "DELETE",
+        });
         if (res.ok) {
-          setTasksData(prevTasks => prevTasks.map(task => ({
-            ...task,
-            files: task.files.filter(f => f.id !== fileId)
-          })));
-          Swal.fire({ icon: 'success', title: 'Đã xóa file!', timer: 1500, showConfirmButton: false });
+          setTasksData((prevTasks) =>
+            prevTasks.map((task) => ({
+              ...task,
+              files: task.files.filter((f) => f.id !== fileId),
+            })),
+          );
+          Swal.fire({
+            icon: "success",
+            title: "Đã xóa file!",
+            timer: 1500,
+            showConfirmButton: false,
+          });
         }
-      } catch (error) { console.error('Lỗi xóa file:', error); }
+      } catch (error) {
+        console.error("Lỗi xóa file:", error);
+      }
     }
   };
 
@@ -1065,7 +1144,7 @@ function App() {
                 gap: "10px",
               }}
             >
-              <IconShield />{" "}
+              <IconLoginArrow />{" "}
               {authMode === "login" ? "Truy cập hệ thống" : "Cập nhật mật khẩu"}
             </button>
           </form>
@@ -1758,7 +1837,7 @@ function App() {
         >
           {[
             { id: "home", icon: IconHome, label: "Tổng quan" },
-            { id: "tasks", icon: IconUsers, label: "Công việc" },
+            { id: "tasks", icon: IconFolder, label: "Công việc" },
           ].map((item) => (
             <div
               key={item.id}
