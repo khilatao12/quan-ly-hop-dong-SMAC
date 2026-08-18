@@ -91,11 +91,7 @@ const IconDocs = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-    <polyline points="14 2 14 8 20 8"></polyline>
-    <path d="M16 13H8"></path>
-    <path d="M16 17H8"></path>
-    <path d="M10 9H8"></path>
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
   </svg>
 );
 const IconLogout = () => (
@@ -430,27 +426,41 @@ function App() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  const handleLogin = async (e) => {
+ const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const res = await fetch(`${API_URL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: authForm.username,
-          password: authForm.password,
-        }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: authForm.username, password: authForm.password })
       });
+      
       if (res.ok) {
         const user = await res.json();
         setCurrentUser(user);
         setSelectedUser(user.id);
-        localStorage.setItem("smac_user", JSON.stringify(user)); // Lưu vào trình duyệt
+        localStorage.setItem('smac_user', JSON.stringify(user));
+        
+        // Báo đăng nhập thành công
+        Swal.fire({ 
+          icon: 'success', 
+          title: `Xin chào, ${user.name}!`, 
+          text: 'Đăng nhập hệ thống thành công.',
+          timer: 1500, 
+          showConfirmButton: false 
+        });
       } else {
-        alert("Sai tên đăng nhập hoặc mật khẩu!");
+        // Báo lỗi sai tài khoản
+        Swal.fire({ 
+          icon: 'error', 
+          title: 'Đăng nhập thất bại', 
+          text: 'Sai tên tài khoản hoặc mật khẩu!',
+          confirmButtonColor: '#0F4C5C'
+        });
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err) { 
+      console.error(err); 
+      Swal.fire({ icon: 'error', title: 'Lỗi mạng', text: 'Không thể kết nối đến máy chủ!', confirmButtonColor: '#0F4C5C' });
     }
   };
 
@@ -458,28 +468,60 @@ function App() {
     e.preventDefault();
     try {
       const res = await fetch(`${API_URL}/change-password`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: authForm.username,
-          oldPassword: authForm.password,
-          newPassword: authForm.newPassword,
-        }),
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: authForm.username, oldPassword: authForm.password, newPassword: authForm.newPassword })
       });
+      
       if (res.ok) {
-        alert("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
-        setAuthMode("login");
-        setAuthForm({ username: "", password: "", newPassword: "" });
+        Swal.fire({ 
+          icon: 'success', 
+          title: 'Hoàn tất!', 
+          text: 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại.',
+          confirmButtonColor: '#0F4C5C'
+        });
+        setAuthMode('login');
+        setAuthForm({ username: '', password: '', newPassword: '' });
       } else {
-        alert("Tài khoản hoặc mật khẩu cũ không đúng!");
+        Swal.fire({ 
+          icon: 'error', 
+          title: 'Từ chối', 
+          text: 'Tài khoản hoặc mật khẩu cũ không chính xác!',
+          confirmButtonColor: '#0F4C5C'
+        });
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err) { 
+      console.error(err); 
+      Swal.fire({ icon: 'error', title: 'Lỗi mạng', text: 'Không thể kết nối đến máy chủ!', confirmButtonColor: '#0F4C5C' });
     }
   };
-  const handleLogout = () => {
-    localStorage.removeItem("smac_user"); // Xóa bộ nhớ
-    setCurrentUser(null); // Đẩy ra màn hình Login
+
+  const handleLogout = async () => {
+    // Hỏi xác nhận trước khi đăng xuất
+    const result = await Swal.fire({
+      title: 'Đăng xuất?',
+      text: "Phiên làm việc hiện tại của bạn sẽ kết thúc.",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#DC2626', // Màu đỏ cảnh báo
+      cancelButtonColor: '#94A3B8',
+      confirmButtonText: 'Đăng xuất ngay',
+      cancelButtonText: 'Hủy'
+    });
+
+    if (result.isConfirmed) {
+      localStorage.removeItem('smac_user'); 
+      setCurrentUser(null); 
+      
+      // Chào tạm biệt
+      Swal.fire({ 
+        icon: 'info', 
+        title: 'Đã đăng xuất', 
+        text: 'Hẹn gặp lại bạn!', 
+        timer: 1500, 
+        showConfirmButton: false 
+      });
+    }
   };
   const [isLoading, setIsLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
