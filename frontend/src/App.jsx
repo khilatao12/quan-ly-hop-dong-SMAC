@@ -449,7 +449,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [activeNav, setActiveNav] = useState("home");
-  const [selectedUser, setSelectedUser] = useState(usersList[0].id);
+  const [selectedUser, setSelectedUser] = useState(currentUser?.id || null);
   const [expandedTask, setExpandedTask] = useState(null);
   const [tasksData, setTasksData] = useState([]);
 
