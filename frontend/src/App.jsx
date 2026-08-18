@@ -648,7 +648,7 @@ function App() {
         >
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
             <img
-              src="/smac-logo.png"
+              src="/smac-logo.jpg"
               alt="S.M.A.C Logo"
               style={{ height: "100px", marginBottom: "16px" }}
             />
@@ -661,7 +661,7 @@ function App() {
                 fontWeight: 800,
               }}
             >
-              Hệ thống Quản lý PCCC
+              Hệ thống Quản lý
             </h2>
             <p
               style={{
@@ -1631,7 +1631,7 @@ function App() {
           }}
         >
           <img
-            src="/smac-logo-removebg-preview.png"
+            src="/smac-logo.jpg"
             alt="Logo"
             style={{ width: "100%", height: "auto", objectFit: "contain" }}
           />
