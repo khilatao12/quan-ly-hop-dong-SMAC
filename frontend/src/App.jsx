@@ -3,9 +3,30 @@ import React, { useState, useEffect } from "react";
 // === Dữ liệu nhân sự mẫu ===
 // === Dữ liệu nhân sự mẫu (Có tài khoản & Mật khẩu) ===
 const initialUsers = [
-  { id: 'u1', username: 'admin', password: '123', name: 'Trần Nam Phong', role: 'admin', title: 'Quản lý dự án' },
-  { id: 'u2', username: 'vana', password: '123', name: 'Nguyễn Văn A', role: 'nhân sự', title: 'Kỹ thuật viên' },
-  { id: 'u3', username: 'thib', password: '123', name: 'Lê Thị B', role: 'nhân sự', title: 'Kỹ thuật viên' },
+  {
+    id: "u1",
+    username: "admin",
+    password: "123",
+    name: "Trần Nam Phong",
+    role: "admin",
+    title: "Quản lý dự án",
+  },
+  {
+    id: "u2",
+    username: "vana",
+    password: "123",
+    name: "Nguyễn Văn A",
+    role: "nhân sự",
+    title: "Kỹ thuật viên",
+  },
+  {
+    id: "u3",
+    username: "thib",
+    password: "123",
+    name: "Lê Thị B",
+    role: "nhân sự",
+    title: "Kỹ thuật viên",
+  },
 ];
 
 // === Bảng màu & token thiết kế ===
@@ -29,6 +50,58 @@ const C = {
 };
 
 // === Icons ===
+const IconUser = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+const IconLock = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+const IconEye = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+const IconShield = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <path d="M9 12l2 2 4-4" />
+  </svg>
+);
 const IconHome = () => (
   <svg
     width="20"
@@ -280,32 +353,42 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
 
   const [users, setUsers] = useState(initialUsers); // Quản lý danh sách user để có thể đổi mật khẩu tạm thời
-  const [authMode, setAuthMode] = useState('login'); // 'login' hoặc 'change_password'
-  const [authForm, setAuthForm] = useState({ username: '', password: '', newPassword: '' });
+  const [authMode, setAuthMode] = useState("login"); // 'login' hoặc 'change_password'
+  const [authForm, setAuthForm] = useState({
+    username: "",
+    password: "",
+    newPassword: "",
+  });
 
   const handleLogin = (e) => {
     e.preventDefault();
-    const user = users.find(u => u.username === authForm.username && u.password === authForm.password);
+    const user = users.find(
+      (u) =>
+        u.username === authForm.username && u.password === authForm.password,
+    );
     if (user) {
       setCurrentUser(user);
       setSelectedUser(user.id);
     } else {
-      alert('Sai tên đăng nhập hoặc mật khẩu!');
+      alert("Sai tên đăng nhập hoặc mật khẩu!");
     }
   };
 
   const handleChangePassword = (e) => {
     e.preventDefault();
-    const userIndex = users.findIndex(u => u.username === authForm.username && u.password === authForm.password);
+    const userIndex = users.findIndex(
+      (u) =>
+        u.username === authForm.username && u.password === authForm.password,
+    );
     if (userIndex !== -1) {
       const updatedUsers = [...users];
       updatedUsers[userIndex].password = authForm.newPassword;
       setUsers(updatedUsers);
-      alert('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
-      setAuthMode('login');
-      setAuthForm({ username: '', password: '', newPassword: '' });
+      alert("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
+      setAuthMode("login");
+      setAuthForm({ username: "", password: "", newPassword: "" });
     } else {
-      alert('Tài khoản hoặc mật khẩu cũ không đúng!');
+      alert("Tài khoản hoặc mật khẩu cũ không đúng!");
     }
   };
   const [isLoading, setIsLoading] = useState(true);
@@ -346,14 +429,20 @@ function App() {
 
   // Tính toán số liệu thực tế cho Dashboard
   // 1. Dữ liệu cho Dashboard (Tổng quan)
-  const dashboardTasks = currentUser?.role === 'admin' ? tasksData : tasksData.filter(t => t.userId === currentUser?.id);
+  const dashboardTasks =
+    currentUser?.role === "admin"
+      ? tasksData
+      : tasksData.filter((t) => t.userId === currentUser?.id);
   const totalTasks = dashboardTasks.length;
-  const completedTasks = dashboardTasks.filter(t => t.status === 'completed').length;
+  const completedTasks = dashboardTasks.filter(
+    (t) => t.status === "completed",
+  ).length;
   const pendingTasks = totalTasks - completedTasks;
 
   // 2. Dữ liệu cho Tab Công việc
-  const displayUserId = currentUser?.role === 'admin' ? selectedUser : currentUser?.id;
-  const userTasks = tasksData.filter(task => task.userId === displayUserId);
+  const displayUserId =
+    currentUser?.role === "admin" ? selectedUser : currentUser?.id;
+  const userTasks = tasksData.filter((task) => task.userId === displayUserId);
 
   // --- CÁC HÀM XỬ LÝ API ---
   const handleCreateTask = async (e) => {
@@ -538,44 +627,342 @@ function App() {
   }
   if (!currentUser) {
     return (
-      <div style={{ backgroundImage: 'linear-gradient(135deg, #012A40 0%, #008782 100%)', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif' }}>
-        <div style={{ backgroundColor: '#fff', padding: '40px', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', width: '400px' }}>
-          
-          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <h2 style={{ margin: '0 0 8px 0', fontFamily: 'Manrope, sans-serif', color: C.accent, fontSize: '24px', fontWeight: 800 }}>S.M.A.C</h2>
-            <p style={{ margin: 0, color: C.inkMuted, fontSize: '14px' }}>Hệ thống Quản lý PCCC</p>
+      <div
+        style={{
+          backgroundImage: "linear-gradient(135deg, #033335 0%, #011E26 100%)",
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "Inter, sans-serif",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "#F8FAFC",
+            padding: "45px 50px",
+            borderRadius: "16px",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
+            width: "480px",
+          }}
+        >
+          <div style={{ textAlign: "center", marginBottom: "32px" }}>
+            <img
+              src="/smac-logo.png"
+              alt="S.M.A.C Logo"
+              style={{ height: "100px", marginBottom: "16px" }}
+            />
+            <h2
+              style={{
+                margin: "0 0 8px 0",
+                fontFamily: "Manrope, sans-serif",
+                color: "#0F4C5C",
+                fontSize: "24px",
+                fontWeight: 800,
+              }}
+            >
+              Hệ thống Quản lý PCCC
+            </h2>
+            <p
+              style={{
+                margin: 0,
+                color: "#5B6472",
+                fontSize: "14px",
+                fontWeight: 500,
+              }}
+            >
+              Quản lý an toàn – Vận hành hiệu quả
+            </p>
+            <div
+              style={{
+                width: "40px",
+                height: "3px",
+                backgroundColor: "#008782",
+                margin: "16px auto 0",
+              }}
+            />
           </div>
 
           {/* TAB CHUYỂN ĐỔI */}
-          <div style={{ display: 'flex', marginBottom: '24px', backgroundColor: C.bg, borderRadius: '8px', padding: '4px' }}>
-            <button onClick={() => setAuthMode('login')} style={{ flex: 1, padding: '10px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '13px', transition: '0.2s', backgroundColor: authMode === 'login' ? '#fff' : 'transparent', color: authMode === 'login' ? C.ink : C.inkMuted, boxShadow: authMode === 'login' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none' }}>Đăng nhập</button>
-            <button onClick={() => setAuthMode('change_password')} style={{ flex: 1, padding: '10px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '13px', transition: '0.2s', backgroundColor: authMode === 'change_password' ? '#fff' : 'transparent', color: authMode === 'change_password' ? C.ink : C.inkMuted, boxShadow: authMode === 'change_password' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none' }}>Đổi mật khẩu</button>
+          <div
+            style={{
+              display: "flex",
+              marginBottom: "32px",
+              backgroundColor: "#F1F5F9",
+              borderRadius: "10px",
+              padding: "6px",
+            }}
+          >
+            <button
+              onClick={() => setAuthMode("login")}
+              style={{
+                flex: 1,
+                padding: "12px",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: "14px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                transition: "all 0.2s",
+                backgroundColor:
+                  authMode === "login" ? "#0F4C5C" : "transparent",
+                color: authMode === "login" ? "#fff" : "#475569",
+                boxShadow:
+                  authMode === "login" ? "0 4px 6px rgba(0,0,0,0.1)" : "none",
+              }}
+            >
+              <IconUser /> Đăng nhập
+            </button>
+            <button
+              onClick={() => setAuthMode("change_password")}
+              style={{
+                flex: 1,
+                padding: "12px",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: "14px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                transition: "all 0.2s",
+                backgroundColor:
+                  authMode === "change_password" ? "#0F4C5C" : "transparent",
+                color: authMode === "change_password" ? "#fff" : "#475569",
+                boxShadow:
+                  authMode === "change_password"
+                    ? "0 4px 6px rgba(0,0,0,0.1)"
+                    : "none",
+              }}
+            >
+              <IconShield /> Đổi mật khẩu
+            </button>
           </div>
 
           {/* FORM XỬ LÝ */}
-          <form onSubmit={authMode === 'login' ? handleLogin : handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <form
+            onSubmit={authMode === "login" ? handleLogin : handleChangePassword}
+            style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+          >
+            {/* Input Tài khoản */}
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: C.inkMuted }}>TÀI KHOẢN</label>
-              <input required type="text" value={authForm.username} onChange={e => setAuthForm({...authForm, username: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${C.border}`, outline: 'none', fontSize: '14px' }} placeholder="Nhập tên tài khoản..." />
-            </div>
-            
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: C.inkMuted }}>{authMode === 'login' ? 'MẬT KHẨU' : 'MẬT KHẨU CŨ'}</label>
-              <input required type="password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${C.border}`, outline: 'none', fontSize: '14px' }} placeholder="Nhập mật khẩu..." />
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  marginBottom: "8px",
+                  color: "#0F4C5C",
+                  textTransform: "uppercase",
+                }}
+              >
+                <IconUser /> TÀI KHOẢN
+              </label>
+              <div
+                style={{
+                  display: "flex",
+                  height: "52px",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  border: "1px solid #E2E8F0",
+                  backgroundColor: "#F8FAFC",
+                }}
+              >
+                <div
+                  style={{
+                    width: "52px",
+                    backgroundColor: "#0F4C5C",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
+                  }}
+                >
+                  <IconUser />
+                </div>
+                <input
+                  required
+                  type="text"
+                  value={authForm.username}
+                  onChange={(e) =>
+                    setAuthForm({ ...authForm, username: e.target.value })
+                  }
+                  style={{
+                    flex: 1,
+                    padding: "0 16px",
+                    border: "none",
+                    outline: "none",
+                    fontSize: "15px",
+                    backgroundColor: "transparent",
+                  }}
+                  placeholder="admin"
+                />
+              </div>
             </div>
 
-            {authMode === 'change_password' && (
+            {/* Input Mật khẩu */}
+            <div>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  marginBottom: "8px",
+                  color: "#0F4C5C",
+                  textTransform: "uppercase",
+                }}
+              >
+                <IconLock /> {authMode === "login" ? "MẬT KHẨU" : "MẬT KHẨU CŨ"}
+              </label>
+              <div
+                style={{
+                  display: "flex",
+                  height: "52px",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  border: "1px solid #E2E8F0",
+                  backgroundColor: "#F8FAFC",
+                }}
+              >
+                <div
+                  style={{
+                    width: "52px",
+                    backgroundColor: "#0F4C5C",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
+                  }}
+                >
+                  <IconLock />
+                </div>
+                <input
+                  required
+                  type="password"
+                  value={authForm.password}
+                  onChange={(e) =>
+                    setAuthForm({ ...authForm, password: e.target.value })
+                  }
+                  style={{
+                    flex: 1,
+                    padding: "0 16px",
+                    border: "none",
+                    outline: "none",
+                    fontSize: "15px",
+                    backgroundColor: "transparent",
+                    letterSpacing: "2px",
+                  }}
+                  placeholder="••••"
+                />
+                <div
+                  style={{
+                    width: "52px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#94A3B8",
+                    cursor: "pointer",
+                  }}
+                >
+                  <IconEye />
+                </div>
+              </div>
+            </div>
+
+            {/* Input Mật khẩu mới */}
+            {authMode === "change_password" && (
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: C.inkMuted }}>MẬT KHẨU MỚI</label>
-                <input required type="password" value={authForm.newPassword} onChange={e => setAuthForm({...authForm, newPassword: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${C.border}`, outline: 'none', fontSize: '14px' }} placeholder="Mật khẩu mới..." />
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    marginBottom: "8px",
+                    color: "#0F4C5C",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  <IconLock /> MẬT KHẨU MỚI
+                </label>
+                <div
+                  style={{
+                    display: "flex",
+                    height: "52px",
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                    border: "1px solid #E2E8F0",
+                    backgroundColor: "#F8FAFC",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "52px",
+                      backgroundColor: "#0F4C5C",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#fff",
+                    }}
+                  >
+                    <IconLock />
+                  </div>
+                  <input
+                    required
+                    type="password"
+                    value={authForm.newPassword}
+                    onChange={(e) =>
+                      setAuthForm({ ...authForm, newPassword: e.target.value })
+                    }
+                    style={{
+                      flex: 1,
+                      padding: "0 16px",
+                      border: "none",
+                      outline: "none",
+                      fontSize: "15px",
+                      backgroundColor: "transparent",
+                      letterSpacing: "2px",
+                    }}
+                    placeholder="••••"
+                  />
+                </div>
               </div>
             )}
 
-            <button type="submit" style={{ marginTop: '10px', width: '100%', padding: '14px', borderRadius: '8px', border: 'none', backgroundColor: C.accent, color: '#fff', fontWeight: 700, fontSize: '15px', cursor: 'pointer' }}>
-              {authMode === 'login' ? 'Truy cập hệ thống' : 'Cập nhật mật khẩu'}
+            <button
+              type="submit"
+              style={{
+                marginTop: "12px",
+                width: "100%",
+                padding: "16px",
+                borderRadius: "8px",
+                border: "none",
+                backgroundColor: "#0F4C5C",
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: "15px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "10px",
+              }}
+            >
+              <IconShield />{" "}
+              {authMode === "login" ? "Truy cập hệ thống" : "Cập nhật mật khẩu"}
             </button>
           </form>
-
         </div>
       </div>
     );
@@ -624,13 +1011,22 @@ function App() {
             border: `1px solid ${C.border}`,
           }}
         >
-          <img
-            src="https://i.pravatar.cc/42?u=tran"
-            alt="Avatar"
-            style={{ width: "32px", height: "32px", borderRadius: "50%" }}
-          />
+          <div
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "50%",
+              backgroundColor: C.accentSoft,
+              color: C.accent,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <IconUser />
+          </div>
           <div style={{ fontSize: "13px", fontWeight: 600, color: C.ink }}>
-            Trần Nam Phong
+            {currentUser?.name}
           </div>
         </div>
       </div>
@@ -880,14 +1276,37 @@ function App() {
       <div style={cardStyle}>
         {/* Chọn nhân sự */}
         {/* Chỉ ADMIN mới thấy thanh chọn nhân sự này */}
-        {currentUser.role === 'admin' && (
-          <div style={{ display: 'flex', gap: '12px', borderBottom: `1px solid ${C.border}`, paddingBottom: '20px', marginBottom: '24px', overflowX: 'auto' }}>
-            {initialUsers.map(user => (
-              <button key={user.id} onClick={() => setSelectedUser(user.id)} style={{
-                padding: '10px 18px', borderRadius: '30px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', border: 'none', transition: 'all 0.2s',
-                backgroundColor: selectedUser === user.id ? C.accent : C.bg, color: selectedUser === user.id ? '#fff' : C.inkMuted,
-              }}>
-                {user.name} <span style={{ fontWeight: 400, opacity: 0.8 }}>- {user.title}</span>
+        {currentUser.role === "admin" && (
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              borderBottom: `1px solid ${C.border}`,
+              paddingBottom: "20px",
+              marginBottom: "24px",
+              overflowX: "auto",
+            }}
+          >
+            {initialUsers.map((user) => (
+              <button
+                key={user.id}
+                onClick={() => setSelectedUser(user.id)}
+                style={{
+                  padding: "10px 18px",
+                  borderRadius: "30px",
+                  fontWeight: 600,
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  border: "none",
+                  transition: "all 0.2s",
+                  backgroundColor: selectedUser === user.id ? C.accent : C.bg,
+                  color: selectedUser === user.id ? "#fff" : C.inkMuted,
+                }}
+              >
+                {user.name}{" "}
+                <span style={{ fontWeight: 400, opacity: 0.8 }}>
+                  - {user.title}
+                </span>
               </button>
             ))}
           </div>
@@ -1204,21 +1623,20 @@ function App() {
       >
         <div
           style={{
-            width: "42px",
-            height: "42px",
-            borderRadius: "10px",
-            backgroundColor: C.accent,
-            color: "#fff",
+            width: "50px",
+            height: "50px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontFamily: "Manrope, sans-serif",
-            fontWeight: 800,
-            fontSize: "14px",
           }}
         >
-          HC
+          <img
+            src="/smac-logo-removebg-preview.png"
+            alt="Logo"
+            style={{ width: "100%", height: "auto", objectFit: "contain" }}
+          />
         </div>
+
         <div
           style={{
             flex: 1,
