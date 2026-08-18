@@ -870,8 +870,9 @@ function App() {
                     fontSize: "15px",
                     backgroundColor: "transparent",
                     letterSpacing: showPassword ? "normal" : "2px",
+                    color: "black"
                   }}
-                  placeholder="••••"
+                  placeholder="Password"
                 />
 
                 {/* Nút bấm ẩn/hiện */}
@@ -946,8 +947,9 @@ function App() {
                       fontSize: "15px",
                       backgroundColor: "transparent",
                       letterSpacing: showNewPassword ? "normal" : "2px",
+                      color: "black"
                     }}
-                    placeholder="••••"
+                    placeholder="New password"
                   />
 
                   {/* Nút bấm ẩn/hiện */}
