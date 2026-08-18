@@ -377,13 +377,15 @@ const API_URL = "https://quan-ly-hop-dong-smac.onrender.com/api";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('smac_user');
+    const saved = localStorage.getItem("smac_user");
     return saved ? JSON.parse(saved) : null;
   });
-  
+
   const [usersList, setUsersList] = useState([]);
   useEffect(() => {
-    fetch(`${API_URL}/users`).then(res => res.json()).then(data => setUsersList(data));
+    fetch(`${API_URL}/users`)
+      .then((res) => res.json())
+      .then((data) => setUsersList(data));
   }, []);
   const [authMode, setAuthMode] = useState("login"); // 'login' hoặc 'change_password'
   const [authForm, setAuthForm] = useState({
@@ -397,40 +399,51 @@ function App() {
     e.preventDefault();
     try {
       const res = await fetch(`${API_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: authForm.username, password: authForm.password })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: authForm.username,
+          password: authForm.password,
+        }),
       });
       if (res.ok) {
         const user = await res.json();
         setCurrentUser(user);
         setSelectedUser(user.id);
-        localStorage.setItem('smac_user', JSON.stringify(user)); // Lưu vào trình duyệt
+        localStorage.setItem("smac_user", JSON.stringify(user)); // Lưu vào trình duyệt
       } else {
-        alert('Sai tên đăng nhập hoặc mật khẩu!');
+        alert("Sai tên đăng nhập hoặc mật khẩu!");
       }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
     try {
       const res = await fetch(`${API_URL}/change-password`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: authForm.username, oldPassword: authForm.password, newPassword: authForm.newPassword })
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: authForm.username,
+          oldPassword: authForm.password,
+          newPassword: authForm.newPassword,
+        }),
       });
       if (res.ok) {
-        alert('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
-        setAuthMode('login');
-        setAuthForm({ username: '', password: '', newPassword: '' });
+        alert("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
+        setAuthMode("login");
+        setAuthForm({ username: "", password: "", newPassword: "" });
       } else {
-        alert('Tài khoản hoặc mật khẩu cũ không đúng!');
+        alert("Tài khoản hoặc mật khẩu cũ không đúng!");
       }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
   const handleLogout = () => {
-    localStorage.removeItem('smac_user'); // Xóa bộ nhớ
+    localStorage.removeItem("smac_user"); // Xóa bộ nhớ
     setCurrentUser(null); // Đẩy ra màn hình Login
   };
   const [isLoading, setIsLoading] = useState(true);
@@ -1671,6 +1684,7 @@ function App() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          justifyContent: "space-between",
           padding: "22px 0",
           borderRight: `1px solid ${C.border}`,
           position: "fixed",
@@ -1734,6 +1748,24 @@ function App() {
               <item.icon />
             </div>
           ))}
+          <div
+            onClick={handleLogout}
+            className="nav-item"
+            style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              color: "#DC2626",
+            }}
+            title="Đăng xuất"
+          >
+            <IconLogout />
+          </div>
         </div>
       </div>
 
